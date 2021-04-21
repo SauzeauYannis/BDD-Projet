@@ -119,11 +119,12 @@ CREATE TABLE Borrow
 (
     borrower_id     INT     NOT NULL,
     copy_id         INT     NOT NULL,
+    document_id     INT     NOT NULL,
     borrow_date     DATE    NOT NULL,
     borrow_ret      DATE,
     CONSTRAINT PK_Borrow          PRIMARY KEY (borrower_id, copy_id),
     CONSTRAINT FK_Borrower_Borrow FOREIGN KEY (borrower_id) REFERENCES Borrower(borrower_id),
-    CONSTRAINT FK_Copy_Borrow     FOREIGN KEY (copy_id) REFERENCES Copy(copy_id)
+    CONSTRAINT FK_Copy_Borrow     FOREIGN KEY (copy_id, document_id) REFERENCES Copy(copy_id, document_id)
 );
 
 DROP TABLE Document_author CASCADE CONSTRAINTS;
@@ -141,9 +142,9 @@ CREATE TABLE Document_keyword
 (
     document_id     INT     NOT NULL,
     keyword_id      INT     NOT NULL,
-    CONSTRAINT PK_Document_author          PRIMARY KEY (document_id, keyword_id),
-    CONSTRAINT FK_Document_Document_author FOREIGN KEY (document_id) REFERENCES Document(document_id),
-    CONSTRAINT FK_Author_Document_author   FOREIGN KEY (keyword_id) REFERENCES Keyword(keyword_id)
+    CONSTRAINT PK_Document_keyword          PRIMARY KEY (document_id, keyword_id),
+    CONSTRAINT FK_Document_Document_keyword FOREIGN KEY (document_id) REFERENCES Document(document_id),
+    CONSTRAINT FK_Author_Document_keyword   FOREIGN KEY (keyword_id) REFERENCES Keyword(keyword_id)
 );
 
 DROP TABLE Book CASCADE CONSTRAINTS;
@@ -183,3 +184,5 @@ CREATE TABLE Video
     CONSTRAINT PK_Video          PRIMARY KEY (document_id),
     CONSTRAINT FK_Document_Video FOREIGN KEY (document_id) REFERENCES Document(document_id)
 );
+
+COMMIT;
