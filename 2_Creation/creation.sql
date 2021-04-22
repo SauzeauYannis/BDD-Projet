@@ -48,7 +48,8 @@ CREATE TABLE Borrower_category
     borrower_category_id    INT             NOT NULL,
     category_name           VARCHAR2(32)    NOT NULL,
     max_borrowing_number    NUMBER(2)       NOT NULL,
-    CONSTRAINT PK_Borrower_category         PRIMARY KEY (borrower_category_id)
+    CONSTRAINT PK_Borrower_category         PRIMARY KEY (borrower_category_id),
+    CHECK ( max_borrowing_number >= 0 )
 );
 
 CREATE TABLE Borrower
@@ -77,7 +78,8 @@ CREATE TABLE Borrowing_duration
     duration        INT     NOT NULL,
     CONSTRAINT PK_Borrowing_duration                   PRIMARY KEY (borrower_cat, document_cat),
     CONSTRAINT FK_Borrower_category_Borrowing_duration FOREIGN KEY (borrower_cat) REFERENCES Borrower_category(borrower_category_id),
-    CONSTRAINT FK_Document_category_Borrowing_duration FOREIGN KEY (document_cat) REFERENCES Document_category(document_category_id)
+    CONSTRAINT FK_Document_category_Borrowing_duration FOREIGN KEY (document_cat) REFERENCES Document_category(document_category_id),
+    CHECK ( duration >= 0 )
 );
 
 CREATE TABLE Document
@@ -91,7 +93,8 @@ CREATE TABLE Document
     CONSTRAINT PK_Document                   PRIMARY KEY (document_id),
     CONSTRAINT FK_Document_category_Document FOREIGN KEY (document_category_id) REFERENCES Document_category(document_category_id),
     CONSTRAINT FK_Publisher_Document         FOREIGN KEY (publisher_id) REFERENCES Publisher(publisher_id),
-    CONSTRAINT FK_Theme_Document             FOREIGN KEY (theme_id) REFERENCES Theme(theme_id)
+    CONSTRAINT FK_Theme_Document             FOREIGN KEY (theme_id) REFERENCES Theme(theme_id),
+    CHECK ( copy_number >= 0 )
 );
 
 CREATE TABLE Copy
@@ -138,7 +141,8 @@ CREATE TABLE Book
     document_id     INT         NOT NULL,
     page_number     NUMBER(4),
     CONSTRAINT PK_Book          PRIMARY KEY (document_id),
-    CONSTRAINT FK_Document_Book FOREIGN KEY (document_id) REFERENCES Document(document_id)
+    CONSTRAINT FK_Document_Book FOREIGN KEY (document_id) REFERENCES Document(document_id),
+    CHECK ( page_number >= 0 )
 );
 
 CREATE TABLE CD
@@ -147,7 +151,9 @@ CREATE TABLE CD
     duration        NUMBER(3),
     subtitle_number NUMBER(3),
     CONSTRAINT PK_CD          PRIMARY KEY (document_id),
-    CONSTRAINT FK_Document_CD FOREIGN KEY (document_id) REFERENCES Document(document_id)
+    CONSTRAINT FK_Document_CD FOREIGN KEY (document_id) REFERENCES Document(document_id),
+    CHECK ( duration >= 0 ),
+    CHECK ( subtitle_number >= 0 )
 );
 
 CREATE TABLE DVD
@@ -155,7 +161,8 @@ CREATE TABLE DVD
     document_id     INT         NOT NULL,
     duration        NUMBER(3),
     CONSTRAINT PK_DVD          PRIMARY KEY (document_id),
-    CONSTRAINT FK_Document_DVD FOREIGN KEY (document_id) REFERENCES Document(document_id)
+    CONSTRAINT FK_Document_DVD FOREIGN KEY (document_id) REFERENCES Document(document_id),
+    CHECK ( duration >= 0 )
 );
 
 CREATE TABLE Video
@@ -164,7 +171,8 @@ CREATE TABLE Video
     duration            NUMBER(3),
     recording_format    VARCHAR2(24),
     CONSTRAINT PK_Video          PRIMARY KEY (document_id),
-    CONSTRAINT FK_Document_Video FOREIGN KEY (document_id) REFERENCES Document(document_id)
+    CONSTRAINT FK_Document_Video FOREIGN KEY (document_id) REFERENCES Document(document_id),
+    CHECK ( duration >= 0 )
 );
 
 COMMIT;
