@@ -1,12 +1,12 @@
 -- Author
-INSERT INTO Author VALUES (0, 'Rowling', 'J-K', '31/07/1965');
+INSERT INTO Author VALUES (0, 'Rowling', 'J-K', TO_DATE('31/07/1965', 'DD/MM/YYYY'));
 
 -- Personal_detail
 INSERT INTO Personal_detail VALUES (0, '02076315600', '50 Bedford Square', 'WC1B 3DP', 'London', 'England');
 INSERT INTO Personal_detail VALUES (1, '0612345678', '667 rue de la street', '93667', '667Land', 'France');
 
 -- Publisher
-INSERT INTO Publisher VALUES (0, 'Bloomsbury', 0);
+INSERT INTO Publisher VALUES (0, 'Bloomsbury');
 
 -- Theme
 INSERT INTO Theme VALUES (0, 'Fantastic');
@@ -60,7 +60,7 @@ INSERT INTO Copy VALUES (3, 0, 100);
 INSERT INTO Copy VALUES (4, 0, 100);
 
 -- Borrow
-INSERT INTO Borrow VALUES (0, 1, 0, '22/04/2021', null);
+INSERT INTO Borrow VALUES (0, 1, 0, TO_DATE('22/04/2021', 'DD/MM/YYYY'), null);
 
 -- Book
 INSERT INTO Book VALUES (0, 500);

@@ -1,4 +1,22 @@
 --TODO à l'insertion d'un livre, CD, etc on doit vérifier si le document est bien de la bonne catégorie (ce serait pas un trigger ducoup?)
+CREATE OR REPLACE TRIGGER trigger_book_category
+    AFTER INSERT OR UPDATE
+    ON Book
+    FOR EACH ROW
+DECLARE
+    category VARCHAR2(64) := 'Livre';
+BEGIN
+    SELECT category_name
+    INTO category
+    FROM Document D,
+         Document_category DC
+    WHERE :new.document_id = D.document_id
+      AND D.document_category_id = DC.document_category_id;
+
+    IF category = 'Livre' THEN
+        INSERT INTO Book VALUES (:new.document_id, :new.page_number);
+    END IF;
+END;
 
 
 -- TRIGGERS DU SUJET
@@ -6,12 +24,14 @@
 -- TODO à chaque fois qu'on ajoute une copie dans la table copie, Docuement(nb_copy) devrait être incrémenté
 DROP TRIGGER tg_incr_nb_copy;
 CREATE TRIGGER tg_incr_nb_copy
-    AFTER INSERT ON COPY FOR EACH ROW
-    BEGIN
-        UPDATE DOCUMENT D
-        SET D.COPY_NUMBER = COPY_NUMBER + 1
-        WHERE D.document_id = new.DOCUMENT_ID; -- new n'est pas reconnu ?
-    end;
+    AFTER INSERT
+    ON COPY
+    FOR EACH ROW
+BEGIN
+    UPDATE DOCUMENT D
+    SET D.COPY_NUMBER = COPY_NUMBER + 1
+    WHERE D.document_id = new.DOCUMENT_ID; -- new n'est pas reconnu ?
+end;
 
 -- TODO - Ne pas pouvoir emprunter un exemplaire en cours d'emprunt
 --        i.e. : on ne peut pas ajouter de lignes pour la copie d'un document dans Borrow ssi ce meme document est présent dans Borrow avec date_ret = null
