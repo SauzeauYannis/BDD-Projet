@@ -21,7 +21,7 @@ INSERT INTO Borrower_category VALUES (1, 'Professionels', 5);
 INSERT INTO Borrower_category VALUES (2, 'Public', 3);
 
 -- Borrower
-INSERT INTO Borrower VALUES (0, 0, 'Chevais', 'Benjamin', 1);
+INSERT INTO Borrower VALUES (0, 0, 'Chevais', 'Benjamin', 1, 0);
 
 -- Document_category
 INSERT INTO Document_category VALUES (0, 'Livre');

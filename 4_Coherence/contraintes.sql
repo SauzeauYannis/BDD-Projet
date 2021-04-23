@@ -81,6 +81,7 @@ BEGIN
 END;
 
 -- TODO à chaque fois qu'on ajoute une copie dans la table copie, Docuement(nb_copy) devrait être incrémenté
+
 DROP TRIGGER tg_incr_nb_copy;
 CREATE TRIGGER tg_incr_nb_copy
     AFTER INSERT ON COPY
@@ -103,6 +104,17 @@ CREATE TRIGGER tg_decr_nb_copy
 
 -- TODO à chaque ajout dans document, nb_copy doit être égal à 0 puisque c'est l'ajout dans Copy qui gère cet attribut.
 
+DROP TRIGGER trigger_doc_nb_copy_create;
+CREATE OR REPLACE TRIGGER trigger_doc_nb_copy_create
+    BEFORE INSERT ON DOCUMENT
+    FOR EACH ROW
+    BEGIN
+        if (:NEW.copy_number <> 0) then
+            raise_application_error(-20500, 'nb_copy doit être à 0');
+        end if;
+    END;
+
+
 -- TRIGGERS DU SUJET
 
 -- TODO - Ne pas pouvoir emprunter un exemplaire en cours d'emprunt
@@ -110,6 +122,26 @@ CREATE TRIGGER tg_decr_nb_copy
 
 -- TODO - nombre d'emprunts inférieur à celui autorisé pour la catégorie de l'emprunteur (on doit rajouter le nombre d'emprunt que l'emprunteur possède je pense)
 --        i.e. : à chaque ajout dans Borrow on incrémente le nb_borrow de l'emprunteur si ce chiffre est supérieur à celui autorisé on doit refuser l'ajout de la ligne
+
+Drop trigger trigger_nb_borrow;
+CREATE OR REPLACE TRIGGER  trigger_nb_borrow
+    AFTER INSERT ON BORROW
+    FOR EACH ROW
+    declare max_borrow INT;
+        current_borrow INT;
+    begin
+        SELECT MAX_BORROWING_NUMBER, CURRENT_NUMBER_BORROW
+            into max_borrow, current_borrow
+        from BORROWER_CATEGORY BC, BORROWER B
+        where :new.borrower_id = B.BORROWER_ID
+        and B.BORROWER_CATEGORY_ID = BC.BORROWER_CATEGORY_ID;
+
+        if (current_borrow+1 > max_borrow) then
+            raise_application_error(-20500, 'Vous etes au maximum dunombre d emprunt, Vous ne pouvez plus faire d emprunts.');
+        else
+            update BORROWER B set CURRENT_NUMBER_BORROW = CURRENT_NUMBER_BORROW + 1 where :new.borrower_id = B.BORROWER_ID;
+        end if;
+    end;
 
 -- TODO - ne pas ré-emprunter de documents si on est hors délai sur l'emprunt d'autres document
 --        il faudrait modifier des attributs dans borrow pour mettre la date de retour estimé (la date à laquelle il est
