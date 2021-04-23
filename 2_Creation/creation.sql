@@ -98,7 +98,7 @@ CREATE TABLE Document
     CONSTRAINT FK_Document_category_Document FOREIGN KEY (document_category_id) REFERENCES Document_category (document_category_id),
     CONSTRAINT FK_Publisher_Document FOREIGN KEY (publisher_id) REFERENCES Publisher (detail_id),
     CONSTRAINT FK_Theme_Document FOREIGN KEY (theme_id) REFERENCES Theme (theme_id),
-    CONSTRAINT check_positive_copy_number CHECK ( copy_number > 0 )
+    CONSTRAINT check_positive_copy_number CHECK ( copy_number >= 0 )
 );
 
 CREATE TABLE Copy
