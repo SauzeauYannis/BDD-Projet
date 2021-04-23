@@ -45,6 +45,7 @@ INSERT INTO Borrowing_duration VALUES (2, 3, 1);
 
 -- Document
 INSERT INTO Document VALUES (0, 'Harry Potter', 0, 0, 0, 0);
+INSERT INTO Document VALUES (1, 'Blanche fesses et les sept mains', 0, 2, 0, 0);
 
 -- Document_author
 INSERT INTO Document_author VALUES (0, 0);
@@ -63,7 +64,10 @@ INSERT INTO Copy VALUES (4, 0, 100);
 INSERT INTO Borrow VALUES (0, 1, 0, TO_DATE('22/04/2021', 'DD/MM/YYYY'), null);
 
 -- Book
-INSERT INTO Book VALUES (0, 500);
+INSERT INTO Book VALUES (0, 500); -- insertion réussi
+INSERT INTO Book VALUES (1, 7);   -- pas d'insertion car le document 1 n'est pas un livre
+UPDATE Book SET page_number = 250 WHERE document_id = 0; -- modification authorisée
+UPDATE Book SET document_id = 1 WHERE page_number = 250; -- modification non authorisée
 
 -- Cd
 

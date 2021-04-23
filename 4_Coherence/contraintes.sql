@@ -4,7 +4,7 @@ CREATE OR REPLACE TRIGGER trigger_book_category
     ON Book
     FOR EACH ROW
 DECLARE
-    category VARCHAR2(64) := 'Livre';
+    category VARCHAR2(64);
 BEGIN
     SELECT category_name
     INTO category
@@ -13,8 +13,8 @@ BEGIN
     WHERE :new.document_id = D.document_id
       AND D.document_category_id = DC.document_category_id;
 
-    IF category = 'Livre' THEN
-        INSERT INTO Book VALUES (:new.document_id, :new.page_number);
+    IF category <> 'Livre' THEN
+        raise_application_error(667, 'mauvaise catégorie');
     END IF;
 END;
 
