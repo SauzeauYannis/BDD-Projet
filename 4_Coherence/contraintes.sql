@@ -24,14 +24,23 @@ END;
 -- TODO à chaque fois qu'on ajoute une copie dans la table copie, Docuement(nb_copy) devrait être incrémenté
 DROP TRIGGER tg_incr_nb_copy;
 CREATE TRIGGER tg_incr_nb_copy
-    AFTER INSERT
-    ON COPY
+    AFTER INSERT ON COPY
     FOR EACH ROW
-BEGIN
-    UPDATE DOCUMENT D
-    SET D.COPY_NUMBER = COPY_NUMBER + 1
-    WHERE D.document_id = new.DOCUMENT_ID; -- new n'est pas reconnu ?
-end;
+    BEGIN
+        update DOCUMENT D
+        set D.COPY_NUMBER = D.COPY_NUMBER + 1
+        where D.DOCUMENT_ID = :NEW.DOCUMENT_iD;
+    END;
+
+DROP TRIGGER tg_decr_nb_copy;
+CREATE TRIGGER tg_decr_nb_copy
+    AFTER DELETE ON COPY
+    FOR EACH ROW
+    BEGIN
+        update DOCUMENT D
+        set D.COPY_NUMBER = D.COPY_NUMBER - 1
+        where D.DOCUMENT_ID = :OLD.DOCUMENT_iD;
+    END;
 
 -- TODO - Ne pas pouvoir emprunter un exemplaire en cours d'emprunt
 --        i.e. : on ne peut pas ajouter de lignes pour la copie d'un document dans Borrow ssi ce meme document est présent dans Borrow avec date_ret = null
