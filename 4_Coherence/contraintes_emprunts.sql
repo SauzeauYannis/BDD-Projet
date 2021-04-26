@@ -2,16 +2,17 @@
 
 -- TODO - Ne pas pouvoir emprunter un exemplaire en cours d'emprunt
 --        i.e. : on ne peut pas ajouter de lignes pour la copie d'un document dans Borrow ssi ce meme document est présent dans Borrow avec date_ret = null
-DROP TRIGGER tg_before_insert_borrow;
 CREATE TRIGGER tg_before_insert_borrow
-    BEFORE INSERT ON BORROW FOR EACH ROW
-    WHEN ( :OLD.COPY_ID = :NEW.COPY_ID)
-    BEGIN
-        IF :OLD.BORROW_DATE = NULL
-            THEN
-                raise_application_error(1,'THE DOCUMENT IS NOT AVAILABLE, YOU CANNOT BORROW IT!' );
-        END IF;
-    END;
+BEFORE INSERT ON BORROW FOR EACH ROW
+WHEN ( OLD.COPY_ID = NEW.COPY_ID)
+BEGIN
+    IF :OLD.BORROW_DATE = NULL
+        THEN
+            RAISE_APPLICATION_ERROR(1,'Erreur d''insertion : Le document est déjà emprunter !' );
+        ELSE
+            NULL;
+    END IF;
+END;
 
 -- TODO - Ne pas pouvoir emprunter un exemplaire avec une date retour déjà fixée
 --        i.e. : on ne peut pas ajouter de lignes avec date_ret != null
@@ -56,3 +57,13 @@ END;
 --              - on récupère tous les emprunts de l'emprunteur
 --              - de cette liste on vérifie s'il y a des lignes avec une date de retour réelle null (s'il y en a pas on peut ajouter l'emprunt)
 --              - pour les emprunts avec une date de retour null, on regarde si la date du nouvel emprunt n'est pas supérieur à une date de retour estimé
+
+-- Désactivation des contraintes
+ALTER TRIGGER tg_before_insert_borrow DISABLE;
+
+-- Activation des contraintes
+ALTER TRIGGER tg_before_insert_borrow ENABLE;
+
+
+-- Supression des contraintes
+DROP TRIGGER tg_before_insert_borrow;
