@@ -127,9 +127,6 @@ INSERT INTO Document_author (document_id, author_id)
 VALUES (8, 5);
 
 INSERT INTO Document_author (document_id, author_id)
-VALUES (8, 5);
-
-INSERT INTO Document_author (document_id, author_id)
 VALUES (11, 6);
 
 INSERT INTO Document_author (document_id, author_id)

@@ -46,3 +46,10 @@ VALUES (1, 2, 1, TO_DATE('22/04/2021', 'DD/MM/YYYY'), NULL); -- réussi car il e
 
 INSERT INTO Borrow (borrower_id, copy_id, document_id, borrow_date, borrow_return)
 VALUES (1, 3, 1, TO_DATE('22/04/2021', 'DD/MM/YYYY'), NULL); -- échoue car il ne peut pas emprunter plus
+
+INSERT INTO Borrow (borrower_id, copy_id, document_id, borrow_date, borrow_return)
+VALUES (2, 1, 1, TO_DATE('22/04/2021', 'DD/MM/YYYY'), NULL); -- échoue car le document voulu est déjà emprunté
+
+INSERT INTO Borrow (borrower_id, copy_id, document_id, borrow_date, borrow_return)
+VALUES (2, 4, 1, TO_DATE('22/04/2021', 'DD/MM/YYYY'), NULL); -- doit être réussi
+

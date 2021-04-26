@@ -118,7 +118,7 @@ CREATE TABLE Borrow
     document_id   INT  NOT NULL,
     borrow_date   DATE NOT NULL,
     borrow_return DATE,
-    CONSTRAINT PK_Borrow PRIMARY KEY (borrower_id, copy_id),
+    CONSTRAINT PK_Borrow PRIMARY KEY (borrow_date, copy_id, document_id),
     CONSTRAINT FK_Borrower_Borrow FOREIGN KEY (borrower_id) REFERENCES Borrower (borrower_id),
     CONSTRAINT FK_Copy_Borrow FOREIGN KEY (copy_id, document_id) REFERENCES Copy (copy_id, document_id),
     CONSTRAINT check_date_borrow_return CHECK ( borrow_return >= borrow_date ) -- Il faut retourner un livre après l'avoir emprunter ou le même jour mais pas avant
