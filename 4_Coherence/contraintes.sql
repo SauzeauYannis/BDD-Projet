@@ -15,6 +15,22 @@ CREATE TRIGGER tg_incr_nb_copy
 
 -- TODO - Ne pas pouvoir emprunter un exemplaire en cours d'emprunt
 --        i.e. : on ne peut pas ajouter de lignes pour la copie d'un document dans Borrow ssi ce meme document est présent dans Borrow avec date_ret = null
+DROP TRIGGER tg_before_insert_borrow;
+CREATE TRIGGER tg_before_insert_borrow
+    BEFORE INSERT ON BORROW FOR EACH ROW
+    WHEN ( :OLD.COPY_ID = :NEW.COPY_ID)
+    BEGIN
+        IF :OLD.BORROW_DATE = NULL
+            THEN
+                raise_application_error(1,'THE DOCUMENT IS NOT AVAILABLE, YOU CANNOT BORROW IT!' );
+        END IF;
+    END;
+
+-- TODO - Ne pas pouvoir emprunter un exemplaire avec une date retour déjà fixée
+--        i.e. : on ne peut pas ajouter de lignes avec date_ret != null
+
+-- TODO - Ne pas pouvoir emprunter un exemplaire en cours d'emprunt
+--        i.e. : on ne peut pas ajouter de lignes pour la copie d'un document dans Borrow ssi ce meme document est présent dans Borrow avec date_ret = null
 
 -- TODO - nombre d'emprunts inférieur à celui autorisé pour la catégorie de l'emprunteur (on doit rajouter le nombre d'emprunt que l'emprunteur possède je pense)
 --        i.e. : à chaque ajout dans Borrow on incrémente le nb_borrow de l'emprunteur si ce chiffre est supérieur à celui autorisé on doit refuser l'ajout de la ligne
