@@ -1,12 +1,27 @@
 -- Requete
 
--- TODO Requete 1
 -- 1
+-- Liste par ordre alphabétique des titres de documents dont le thème comprend le mot
+-- informatique ou mathématiques.
 
+SELECT D.title, T.word
+FROM Document D, Theme T
+WHERE D.theme_id = T.theme_id
+AND (T.word = 'Informatique' OR T.word = 'Mathématique')
+ORDER BY title;
 
--- TODO Requete 2
 -- 2
+-- Liste (titre et thème) des documents empruntés par Dupont entre le 15/11/2018 et le
+-- 15/11/2019
 
+SELECT D.title, T.word
+FROM Borrow B, Borrower Ber, Document D, Theme T
+WHERE B.borrower_id = Ber.borrower_id
+AND B.document_id = D.document_id
+AND D.theme_id = T.theme_id
+AND Ber.last_name = 'Dupont'
+AND TO_DATE('15/11/2018', 'DD/MM/YYYY') <= B.borrow_date
+AND B.borrow_date <= TO_DATE('15/11/2019', 'DD/MM/YYYY');
 
 -- TODO Requete 3
 -- 3

@@ -1,3 +1,7 @@
+-- Suppression des contraintes
+
+DROP TRIGGER trigger_borrower_current_number_borrow;
+
 -- le nombre d'emprunt courrant d'un emprunteur doir être égal à 0
 
 CREATE OR REPLACE TRIGGER trigger_borrower_current_number_borrow
@@ -23,6 +27,3 @@ ALTER TRIGGER trigger_borrower_current_number_borrow DISABLE;
 ALTER TRIGGER trigger_borrower_current_number_borrow ENABLE;
 
 
--- Suppression des contraintes
-
-DROP TRIGGER trigger_borrower_current_number_borrow;
