@@ -10,7 +10,7 @@ INSERT INTO Theme (word)
 VALUES ('Informatique');
 
 INSERT INTO Theme (word)
-VALUES ('Mathématique');
+VALUES ('Mathématiques');
 
 INSERT INTO Theme (word)
 VALUES ('Chanson française');
