@@ -1,0 +1,3 @@
+Pour gérer automatiquement les transactions, il faut changer dans votre IDE l'option AUTOCOMMIT :
+- Pour SQL Developer : Window->Preferences->Database->Advanced->Autocommit (check)
+- Pour DataGrip : File->Data Source->Oracle->Options->Transaction control->Auto
