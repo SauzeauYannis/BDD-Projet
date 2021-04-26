@@ -43,7 +43,6 @@ BEGIN
 END;
 /
 
-
 -- Désactivation des contraintes
 
 ALTER TRIGGER trigger_increase_copy_number DISABLE;

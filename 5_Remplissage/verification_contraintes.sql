@@ -5,7 +5,7 @@
 -- Vérifications des contraintes de catégories
 
 INSERT INTO Book (document_id, page_number)
-VALUES (1, 7); -- pas d'insertion car le document 1 n'est pas un livre
+VALUES (100, 7); -- pas d'insertion car le document 1 n'est pas un livre
 
 UPDATE Book
 SET document_id = 1
@@ -25,6 +25,14 @@ VALUES (0, 500, 'mp4'); -- échoue car le document 0 n'est pas une Video
 
 INSERT INTO Document (title, copy_number, document_category_id, publisher_id, theme_id)
 VALUES ('test', 5, 0, 0, 0); -- échoue car le nombre de copy doit être égal à 0
+
+-- Vérifications des contraintes de Borrower
+
+INSERT INTO Borrower (borrower_category_id, last_name, first_name, detail_id, current_number_borrow)
+VALUES (1, 'nom', 'prenom', 2, 1);
+
+INSERT INTO Borrower (borrower_category_id, last_name, first_name, detail_id, current_number_borrow)
+VALUES (1, 'nom', 'prenom', 2, 0); -- échoue car le nombre courant d'emprunt n'est pas égal à 0
 
 
 -- Vérifications des contraintes d'emprunts

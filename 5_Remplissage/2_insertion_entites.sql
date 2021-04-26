@@ -24,5 +24,5 @@ VALUES (1, 'Bloomsbury');
 
 -- Emprunteurs
 
-INSERT INTO Borrower (borrower_category_id, last_name, first_name, detail_id, current_number_borrow)
-VALUES (1, 'Chevais', 'Benjamin', 2, 0);
+INSERT INTO Borrower (borrower_category_id, last_name, first_name, detail_id)
+VALUES (1, 'Chevais', 'Benjamin', 2);
