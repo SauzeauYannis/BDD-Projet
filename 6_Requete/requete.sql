@@ -34,9 +34,9 @@ WHERE B.borrower_id = Bwer.borrower_id
 -- Pour chaque emprunteur, donner la liste des titres des documents qu'il a empruntés avec le
 -- nom des auteurs pour chaque document.
 
-SELECT Bwer.last_name || ' ' || Bwer.first_name AS Emprunteur,
-       D.title                                  AS Titre,
-       A.last_name || ' ' || A.first_name       AS Auteur
+SELECT DISTINCT Bwer.last_name || ' ' || Bwer.first_name AS Emprunteur,
+                D.title                                  AS Titre,
+                A.last_name || ' ' || A.first_name       AS Auteur
 FROM Borrow B,
      Borrower Bwer,
      Author A,
@@ -45,7 +45,8 @@ FROM Borrow B,
 WHERE B.borrower_id = Bwer.borrower_id
   AND D.document_id = B.document_id
   AND D.document_id = DA.document_id
-  AND DA.author_id = A.author_id;
+  AND DA.author_id = A.author_id
+ORDER BY Emprunteur;
 
 
 -- TODO Requete 4
@@ -54,7 +55,7 @@ WHERE B.borrower_id = Bwer.borrower_id
 -- exécuter sur la base d'un autre collègue qui doit vous autoriser à lire certaines tables (uniquement
 -- celles qui sont utiles pour la requête).
 
-SELECT A.last_name AS Nom, A.first_name AS Prénom
+SELECT DISTINCT A.last_name AS Nom, A.first_name AS Prénom
 FROM Author A,
      Publisher P,
      Document D,
@@ -63,7 +64,6 @@ WHERE A.author_id = DA.author_id
   AND DA.document_id = D.document_id
   AND D.publisher_id = P.detail_id
   AND P.name = 'Dunod'
-GROUP BY (A.last_name, A.first_name)
 ORDER BY A.last_name;
 
 
@@ -134,17 +134,42 @@ WHERE B.detail_id = PD.detail_id
                       WHERE last_name = 'Dupont');
 
 
--- TODO Requete 10
 -- 10
+-- Liste des éditeurs n'ayant pas édité de documents d'informatique
+
+SELECT DISTINCT P.name
+FROM Publisher P,
+     Document D
+WHERE D.publisher_id = P.detail_id
+  AND D.theme_id NOT IN (SELECT T.theme_id
+                         FROM Theme T
+                         WHERE T.word = 'Informatique')
+ORDER BY P.name;
 
 
 -- TODO Requete 11
 -- 11
+-- Noms des personnes n'ayant jamais emprunté de documents
 
+SELECT distinct Ber.first_name || ' ' || Ber.last_name AS Emprunteur
+FROM Borrower Ber
+WHERE Ber.borrower_id NOT IN (SELECT Ber.borrower_id
+                              FROM Borrow B,
+                                   Borrower Ber
+                              WHERE B.borrower_id = Ber.borrower_id);
 
 -- TODO Requete 12
 -- 12
+-- Liste des documents n'ayant jamais été empruntés.
 
+SELECT distinct D.title
+FROM Document D,
+     Borrow B
+WHERE D.document_id NOT IN (SELECT D.document_id
+                            FROM Document D,
+                                 Borrow B
+                            WHERE D.document_id = B.document_id)
+ORDER BY D.title;
 
 -- TODO Requete 13
 -- 13
