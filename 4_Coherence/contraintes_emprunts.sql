@@ -7,29 +7,23 @@ CREATE OR REPLACE TRIGGER tg_before_insert_borrow
 DECLARE
     b_document INT;
     b_copy INT;
+    b_date DATE;
     b_return_date DATE;
+
 BEGIN
-    SELECT DOCUMENT_ID, COPY_ID, BORROW_RETURN, max(BORROW_DATE)
-    INTO b_document, b_copy, b_return_date
-    FROM Borrow B
+    SELECT BORROW_RETURN, BORROW_DATE
+    INTO b_return_date, b_date
+    FROM BORROW B
         WHERE B.COPY_ID = :NEW.copy_id
-            AND B.DOCUMENT_ID = :NEW.document_id
-    GROUP BY (DOCUMENT_ID, COPY_ID);
+            AND B.DOCUMENT_ID = :NEW.document_id;
 
     IF (b_return_date IS NULL)
     THEN
         RAISE_APPLICATION_ERROR(-20007,'Erreur d''insertion : Le document est déjà emprunter !' );
-
-END;
-ELSE
+    ELSE
             NULL;
 END IF;
-
--- TODO - Ne pas pouvoir emprunter un exemplaire avec une date retour déjà fixée
---        i.e. : on ne peut pas ajouter de lignes avec date_ret != null
-
--- TODO - Ne pas pouvoir emprunter un exemplaire en cours d'emprunt
---        i.e. : on ne peut pas ajouter de lignes pour la copie d'un document dans Borrow ssi ce meme document est présent dans Borrow avec date_ret = null
+    END;
 
 -- TODO - nombre d'emprunts inférieur à celui autorisé pour la catégorie de l'emprunteur (on doit rajouter le nombre d'emprunt que l'emprunteur possède je pense)
 --        i.e. : à chaque ajout dans Borrow on incrémente le nb_borrow de l'emprunteur si ce chiffre est supérieur à celui autorisé on doit refuser l'ajout de la ligne
