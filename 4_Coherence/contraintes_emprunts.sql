@@ -1,14 +1,38 @@
--- TRIGGERS DU SUJET
+-- bla bla
 
--- TODO - Ne pas pouvoir emprunter un exemplaire en cours d'emprunt
---        i.e. : on ne peut pas ajouter de lignes pour la copie d'un document dans Borrow ssi ce meme document est présent dans Borrow avec date_ret = null
+-- Création des contraintes
 
--- TODO - nombre d'emprunts inférieur à celui autorisé pour la catégorie de l'emprunteur (on doit rajouter le nombre d'emprunt que l'emprunteur possède je pense)
---        i.e. : à chaque ajout dans Borrow on incrémente le nb_borrow de l'emprunteur si ce chiffre est supérieur à celui autorisé on doit refuser l'ajout de la ligne
+-- ne pas pouvoir emprunter un exemplaire en cours d'emprunt
 
-Drop trigger trigger_current_number_borrow;
-CREATE OR REPLACE TRIGGER trigger_current_number_borrow
-    AFTER INSERT
+CREATE OR REPLACE TRIGGER trigger_copy_borrowed
+    BEFORE INSERT
+    ON Borrow
+    FOR EACH ROW
+DECLARE
+    is_borrowed INT;
+BEGIN
+    SELECT COUNT(*)
+    INTO is_borrowed
+    FROM Borrow
+    WHERE :NEW.copy_id = copy_id
+      AND :NEW.document_id = document_id
+      AND borrow_return IS NULL;
+
+    IF is_borrowed > 0 THEN
+        RAISE_APPLICATION_ERROR(-20008,
+                                'Erreur d''insertion : L''exemplaire que vous essayez d''emprunter est encore en cours d''emprunt');
+    ELSE
+        NULL;
+    END IF;
+END;
+/
+
+-- nombre d'emprunts inférieur à celui autorisé pour la catégorie de l'emprunteur
+
+CREATE OR
+    REPLACE TRIGGER trigger_current_number_borrow
+    AFTER
+        INSERT
     ON Borrow
     FOR EACH ROW
 DECLARE
@@ -33,10 +57,59 @@ BEGIN
 END;
 /
 
--- TODO - ne pas ré-emprunter de documents si on est hors délai sur l'emprunt d'autres document
---        il faudrait modifier des attributs dans borrow pour mettre la date de retour estimé (la date à laquelle il est
---        censé rendre le document) et la date de retour réelle (celle à laquelle il rend le document) qui peut être null
---        i.e. : à chaque ajout dans borrow :
---              - on récupère tous les emprunts de l'emprunteur
---              - de cette liste on vérifie s'il y a des lignes avec une date de retour réelle null (s'il y en a pas on peut ajouter l'emprunt)
---              - pour les emprunts avec une date de retour null, on regarde si la date du nouvel emprunt n'est pas supérieur à une date de retour estimé
+-- ne pas ré-emprunter de documents si on est hors délai sur l'emprunt d'autres documents
+
+CREATE OR REPLACE TRIGGER trigger_is_out_of_time
+    BEFORE INSERT
+    ON Borrow
+    FOR EACH ROW
+DECLARE
+    is_out_of_time INT;
+BEGIN
+    SELECT COUNT(*)
+    INTO is_out_of_time
+    FROM Borrow B
+    WHERE :NEW.borrower_id = borrower_id
+      AND borrow_return IS NULL
+      AND :NEW.borrow_date > borrow_date + (
+          SELECT duration
+          FROM Borrower Ber,
+               Borrowing_duration BD
+          WHERE :NEW.borrower_id = Ber.borrower_id
+          AND Ber.borrower_category_id = BD.borrower_category_id
+          AND BD.DOCUMENT_CATEGORY_ID = (
+              SELECT document_category_id
+              FROM Document D
+              WHERE B.document_id = D.document_id
+              )
+        )
+    ;
+
+    IF is_out_of_time > 0 THEN
+        RAISE_APPLICATION_ERROR(-20009,
+                                'Erreur d''insertion : Vous ne pouvez pas emprunter lorsque vous êtes hors délai sur l''emprunt d''autres documents');
+    ELSE
+        NULL;
+    END IF;
+END;
+/
+
+-- Désactivation des contraintes
+
+ALTER TRIGGER trigger_copy_borrowed DISABLE;
+ALTER TRIGGER trigger_current_number_borrow DISABLE;
+ALTER TRIGGER trigger_is_out_of_time DISABLE;
+
+
+-- Activation des contraintes
+
+ALTER TRIGGER trigger_copy_borrowed ENABLE;
+ALTER TRIGGER trigger_current_number_borrow ENABLE;
+ALTER TRIGGER trigger_is_out_of_time ENABLE;
+
+
+-- Suppression des contraintes
+
+DROP TRIGGER trigger_copy_borrowed;
+DROP TRIGGER trigger_current_number_borrow;
+DROP TRIGGER trigger_is_out_of_time;
