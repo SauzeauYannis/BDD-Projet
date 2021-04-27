@@ -1,4 +1,5 @@
--- bla bla
+-- Lors d'un emprunt il faut vérifier plusieurs contraintes, les principales sont listées ci-dessous
+
 
 -- Création des contraintes
 
