@@ -34,18 +34,19 @@ WHERE B.borrower_id = Bwer.borrower_id
 -- Pour chaque emprunteur, donner la liste des titres des documents qu'il a empruntés avec le
 -- nom des auteurs pour chaque document.
 
-SELECT Bwer.last_name || ' ' || Bwer.first_name AS Emprunteur,
-       D.title                                  AS Titre,
-       A.last_name || ' ' || A.first_name       AS Auteur
+SELECT Bwer.last_name || ' ' || Bwer.first_name            AS Emprunteur,
+       D.title                                             AS Titre,
+       LISTAGG(A.last_name || ' ' || A.first_name, ' et ') AS Auteur
 FROM Borrow B,
      Borrower Bwer,
      Author A,
      Document D,
-     DOCUMENT_AUTHOR DA
+     Document_author DA
 WHERE B.borrower_id = Bwer.borrower_id
   AND D.document_id = B.document_id
   AND D.document_id = DA.document_id
-  AND DA.author_id = A.author_id;
+  AND DA.author_id = A.author_id
+GROUP BY A.LAST_NAME, Bwer.first_name, Bwer.last_name, D.title;
 
 
 -- TODO Requete 4
