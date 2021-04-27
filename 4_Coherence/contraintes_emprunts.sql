@@ -94,11 +94,50 @@ BEGIN
 END;
 /
 
+-- Avertissement lors de la remise en retard d'un document
+
+CREATE OR REPLACE TRIGGER trigger_late_return
+    BEFORE UPDATE
+    ON Borrow
+    FOR EACH ROW
+DECLARE
+    PRAGMA AUTONOMOUS_TRANSACTION;
+    is_return_late INT;
+BEGIN
+    SELECT COUNT(*)
+    INTO is_return_late
+    FROM BORROW
+    WHERE :NEW.borrow_return > :OLD.borrow_date + (
+          SELECT duration
+          FROM Borrower Ber,
+               Borrowing_duration BD
+          WHERE :OLD.borrower_id = Ber.borrower_id
+          AND Ber.borrower_category_id = BD.borrower_category_id
+          AND BD.DOCUMENT_CATEGORY_ID = (
+              SELECT document_category_id
+              FROM Document D
+              WHERE :OLD.document_id = D.document_id
+              )
+        )
+    ;
+
+    IF is_return_late > 0 THEN
+        BEGIN
+            DBMS_OUTPUT.PUT_LINE('Avertissement : Vous avez remis votre document en retard');
+        END;
+    ELSE
+        NULL;
+    END IF;
+END;
+/
+
+
 -- Désactivation des contraintes
 
 ALTER TRIGGER trigger_copy_borrowed DISABLE;
 ALTER TRIGGER trigger_current_number_borrow DISABLE;
 ALTER TRIGGER trigger_is_out_of_time DISABLE;
+ALTER TRIGGER trigger_late_return DISABLE;
 
 
 -- Activation des contraintes
@@ -106,6 +145,7 @@ ALTER TRIGGER trigger_is_out_of_time DISABLE;
 ALTER TRIGGER trigger_copy_borrowed ENABLE;
 ALTER TRIGGER trigger_current_number_borrow ENABLE;
 ALTER TRIGGER trigger_is_out_of_time ENABLE;
+ALTER TRIGGER trigger_late_return ENABLE;
 
 
 -- Suppression des contraintes
@@ -113,3 +153,4 @@ ALTER TRIGGER trigger_is_out_of_time ENABLE;
 DROP TRIGGER trigger_copy_borrowed;
 DROP TRIGGER trigger_current_number_borrow;
 DROP TRIGGER trigger_is_out_of_time;
+DROP TRIGGER trigger_late_return;

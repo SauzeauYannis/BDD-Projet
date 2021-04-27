@@ -5,8 +5,7 @@
 -- Vérifications des contraintes de Borrower
 
 INSERT INTO Borrower (borrower_category_id, last_name, first_name, detail_id, current_number_borrow)
-VALUES (1, 'nom', 'prenom', 2, 1);
--- échoue car le nombre courant d'emprunt n'est pas égal à 0
+VALUES (1, 'nom', 'prenom', 2, 1); -- échoue car le nombre courant d'emprunt n'est pas égal à 0
 
 
 -- Vérifications des contraintes de catégories
@@ -25,15 +24,13 @@ INSERT INTO DVD (document_id, duration)
 VALUES (0, 500); -- échoue car le document 0 n'est pas un DVD
 
 INSERT INTO Video (document_id, duration, recording_format)
-VALUES (0, 500, 'mp4');
--- échoue car le document 0 n'est pas une Video
+VALUES (0, 500, 'mp4'); -- échoue car le document 0 n'est pas une Video
 
 
 -- Vérifications des contraintes de copies
 
 INSERT INTO Document (title, copy_number, document_category_id, publisher_id, theme_id)
-VALUES ('test', 5, 0, 0, 0);
--- échoue car le nombre de copy doit être égal à 0
+VALUES ('test', 5, 0, 0, 0); -- échoue car le nombre de copy doit être égal à 0
 
 
 -- Vérifications des contraintes d'emprunts
@@ -44,9 +41,7 @@ INSERT INTO Borrow (borrower_id, copy_id, document_id, borrow_date, borrow_retur
 VALUES (2, 3, 1, TO_DATE('27/04/2021', 'DD/MM/YYYY'), NULL); -- Validation : L'emprunteur 2 emprunte l'exemplaire 3 du document 1
 
 INSERT INTO Borrow (borrower_id, copy_id, document_id, borrow_date, borrow_return)
-VALUES (1, 3, 1, TO_DATE('29/04/2021', 'DD/MM/YYYY'), NULL);
-
--- Erreur : L'emprunteur 1 veut emprunter un exemlaire en cours d'emprunt
+VALUES (1, 3, 1, TO_DATE('29/04/2021', 'DD/MM/YYYY'), NULL); -- Erreur : L'emprunteur 1 veut emprunter un exemlaire en cours d'emprunt
 
 -- nombre d'emprunts inférieur à celui autorisé pour la catégorie de l'emprunteur
 
@@ -58,8 +53,7 @@ INSERT INTO Borrow (borrower_id, copy_id, document_id, borrow_date, borrow_retur
 VALUES (1, 2, 1, TO_DATE('22/04/2021', 'DD/MM/YYYY'), NULL); -- réussi car il est à son maximum d'emprunt possible (10)
 
 INSERT INTO Borrow (borrower_id, copy_id, document_id, borrow_date, borrow_return)
-VALUES (1, 3, 1, TO_DATE('22/04/2021', 'DD/MM/YYYY'), NULL);
--- échoue car il ne peut pas emprunter plus
+VALUES (1, 3, 1, TO_DATE('22/04/2021', 'DD/MM/YYYY'), NULL); -- échoue car il ne peut pas emprunter plus
 
 -- ne pas ré-emprunter de documents si on est hors délai sur l'emprunt d'autres documents
 
@@ -71,3 +65,17 @@ VALUES (3, 2, 1, TO_DATE('27/04/2021', 'DD/MM/YYYY'), NULL); -- Erreur : L'empru
 
 INSERT INTO Borrow (borrower_id, copy_id, document_id, borrow_date, borrow_return)
 VALUES (3, 2, 1, TO_DATE('17/04/2021', 'DD/MM/YYYY'), NULL); -- Validation :L'emprunteur 3 emprunte un document le 17 avril 2021 car il n'est pas encore hors-délai sur le document du 15 avril
+
+-- Avertissement lors de la remise en retard d'un document
+
+UPDATE BORROW
+SET borrow_return = TO_DATE('27/04/2021', 'DD/MM/YYYY')
+WHERE borrower_id = 3
+  AND copy_id = 2
+  AND document_id = 5; -- Document rendu  en retard = message d'avertissement
+
+UPDATE BORROW
+SET borrow_return = TO_DATE('17/04/2021', 'DD/MM/YYYY')
+WHERE borrower_id = 3
+  AND copy_id = 2
+  AND document_id = 5;  -- Document rendu à temps = pas de message d'avertissement
