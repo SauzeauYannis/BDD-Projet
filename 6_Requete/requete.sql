@@ -1,21 +1,23 @@
--- Requete
+-- Requêtes
+
 
 -- 1
 -- Liste par ordre alphabétique des titres de documents dont le thème comprend le mot
 -- informatique ou mathématiques.
 
-SELECT D.title, T.word
+SELECT D.title AS Titre, T.word AS Thème
 FROM Document D,
      Theme T
 WHERE D.theme_id = T.theme_id
   AND (T.word = 'Informatique' OR T.word = 'Mathématiques')
 ORDER BY title;
 
+
 -- 2
 -- Liste (titre et thème) des documents empruntés par Dupont entre le 15/11/2018 et le
 -- 15/11/2019
 
-SELECT D.title, T.word
+SELECT D.title AS Titre, T.word AS Thème
 FROM Borrow B,
      Borrower Bwer,
      Document D,
@@ -27,12 +29,14 @@ WHERE B.borrower_id = Bwer.borrower_id
   AND TO_DATE('15/11/2018', 'DD/MM/YYYY') <= B.borrow_date
   AND B.borrow_date <= TO_DATE('15/11/2019', 'DD/MM/YYYY');
 
--- TODO trouver le moyen de regrouper des lignes
+
 -- 3
 -- Pour chaque emprunteur, donner la liste des titres des documents qu'il a empruntés avec le
 -- nom des auteurs pour chaque document.
 
-SELECT Bwer.last_name, Bwer.first_name, D.title, A.last_name, A.first_name
+SELECT Bwer.last_name || ' ' || Bwer.first_name AS Emprunteur,
+       D.title                                  AS Titre,
+       A.last_name || ' ' || A.first_name       AS Auteur
 FROM Borrow B,
      Borrower Bwer,
      Author A,
@@ -50,7 +54,7 @@ WHERE B.borrower_id = Bwer.borrower_id
 -- exécuter sur la base d'un autre collègue qui doit vous autoriser à lire certaines tables (uniquement
 -- celles qui sont utiles pour la requête).
 
-SELECT A.last_name, A.first_name
+SELECT A.last_name AS Nom, A.first_name AS Prénom
 FROM Author A,
      Publisher P,
      Document D,
@@ -66,7 +70,7 @@ ORDER BY A.last_name;
 -- 5
 -- Quantité totale des exemplaires édités chez Eyrolles
 
-SELECT Count(*)
+SELECT COUNT(*) AS Quantité
 FROM Document D,
      Copy C,
      PUBLISHER P
@@ -78,7 +82,7 @@ WHERE P.name = 'Eyrolles'
 -- 6
 -- Pour chaque éditeur, nombre de documents présents à la bibliothèque.
 
-SELECT P.name, count(C.copy_id) as Nombre_de_document
+SELECT P.name AS Editeur, COUNT(C.copy_id) as Nombre_de_document
 FROM Publisher P,
      Document D,
      Copy C
@@ -91,7 +95,7 @@ ORDER BY P.name;
 -- 7
 -- Pour chaque document, nombre de fois où il a été emprunté.
 
-SELECT D.title, Count(D.title) as nb_emprunte
+SELECT D.title AS Titre, COUNT(D.title) AS Nombre_d_empunts
 FROM Borrow B,
      Copy C,
      DOCUMENT D
@@ -105,28 +109,29 @@ GROUP BY D.title;
 -- 8
 -- Liste des éditeurs ayant édité plus de deux documents d'informatique ou de mathématiques.
 
-SELECT P.name, Count(P.name) as nb_document_edite
+SELECT P.name AS Editeur, COUNT(P.name) AS Nombre_d_edition
 FROM Publisher P,
      Document D,
      Theme T
 WHERE D.publisher_id = P.detail_id
   AND D.theme_id = T.theme_id
   AND (T.word = 'Informatique' OR T.word = 'Mathématique')
-HAVING Count(P.name) >= 2
+HAVING COUNT(P.name) >= 2
 GROUP BY P.name
 ORDER BY P.name;
+
 
 -- TODO Requete 9
 -- 9
 -- Noms des emprunteurs habitant la même adresse que Dupont.
 
-SELECT Pd.street, PD.postcode, Pd.city, B1.last_name, B1.first_name
-FROM Borrower B1,
+SELECT PD.street AS Adresse, PD.postcode AS Code_postal, PD.city AS Ville, B.last_name AS Nom, B.first_name AS Prénom
+FROM Borrower B,
      Personal_detail PD
-WHERE B1.detail_id = PD.detail_id
-  AND B1.detail_id IN (SELECT B2.detail_id
-                       from BORROWER B2
-                       where B2.last_name = 'Dupont');
+WHERE B.detail_id = PD.detail_id
+  AND B.detail_id IN (SELECT detail_id
+                      FROM Borrower
+                      WHERE last_name = 'Dupont');
 
 
 -- TODO Requete 10
