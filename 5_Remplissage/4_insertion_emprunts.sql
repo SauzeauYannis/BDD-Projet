@@ -14,4 +14,13 @@ VALUES (4, 2, 12, TO_DATE('12/02/2019', 'DD/MM/YYYY'), TO_DATE('16/02/2019', 'DD
 INSERT INTO Borrow (borrower_id, copy_id, document_id, borrow_date, borrow_return)
 VALUES (4, 1, 13, TO_DATE('15/11/2019', 'DD/MM/YYYY'), NULL);
 
+INSERT INTO Borrow (borrower_id, copy_id, document_id, borrow_date, borrow_return)
+VALUES (6, 1, 18, TO_DATE('29/03/2021', 'DD/MM/YYYY'), NULL);
+
+INSERT INTO Borrow (borrower_id, copy_id, document_id, borrow_date, borrow_return)
+VALUES (6, 2, 18, TO_DATE('29/03/2021', 'DD/MM/YYYY'), NULL);
+
+INSERT INTO Borrow (borrower_id, copy_id, document_id, borrow_date, borrow_return)
+VALUES (7, 1, 19, TO_DATE('29/03/2021', 'DD/MM/YYYY'), NULL);
+
 COMMIT;

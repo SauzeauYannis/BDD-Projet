@@ -105,7 +105,6 @@ WHERE B.copy_id = C.copy_id
 GROUP BY D.title;
 
 
--- TODO Requete 8
 -- 8
 -- Liste des éditeurs ayant édité plus de deux documents d'informatique ou de mathématiques.
 
@@ -121,7 +120,6 @@ GROUP BY P.name
 ORDER BY P.name;
 
 
--- TODO Requete 9
 -- 9
 -- Noms des emprunteurs habitant la même adresse que Dupont.
 
@@ -147,7 +145,6 @@ WHERE D.publisher_id = P.detail_id
 ORDER BY P.name;
 
 
--- TODO Requete 11
 -- 11
 -- Noms des personnes n'ayant jamais emprunté de documents
 
@@ -158,7 +155,7 @@ WHERE Ber.borrower_id NOT IN (SELECT Ber.borrower_id
                                    Borrower Ber
                               WHERE B.borrower_id = Ber.borrower_id);
 
--- TODO Requete 12
+
 -- 12
 -- Liste des documents n'ayant jamais été empruntés.
 
@@ -171,16 +168,49 @@ WHERE D.document_id NOT IN (SELECT D.document_id
                             WHERE D.document_id = B.document_id)
 ORDER BY D.title;
 
--- TODO Requete 13
+
 -- 13
+-- Donnez la liste des emprunteurs (nom, prénom) appartenant à la catégorie des
+-- professionnels ayant emprunté au moins une fois un dvd au cours des 6 derniers mois.
+
+SELECT DISTINCT Bwer.first_name || ' ' || Bwer.last_name AS Emprunteur
+FROM Borrower Bwer,
+     Borrower_category BC,
+     Borrow B
+WHERE BC.category_name = 'Professionels'
+  AND BC.borrower_category_id = Bwer.borrower_category_id
+  AND Bwer.borrower_id = B.borrower_id
+  AND (CURRENT_DATE - B.borrow_date) <= 180 -- 6 * 30 jours
+AND B.document_id IN (SELECT D.document_id
+                        FROM Document D,
+                            DOCUMENT_CATEGORY DC
+                        WHERE D.document_category_id = DC.document_category_id
+                          AND DC.category_name = 'DVD')
+ORDER BY Emprunteur;
 
 
--- TODO Requete 14
 -- 14
+-- Liste des documents dont le nombre d'exemplaires est supérieur au nombre moyen
+-- d'exemplaires
 
+SELECT title
+FROM Document
+WHERE copy_number > (SELECT AVG(SUM(copy_number))
+                    FROM Document D
+                    GROUP BY document_id);
 
--- TODO Requete 15
+-- TODO Requete 15 (ne marche pas)
 -- 15
+-- Noms des auteurs ayant écrit des documents d'informatique et de mathématiques (ceux qui
+-- ont écrit les deux).
+
+SELECT A.first_name || ' ' || A.last_name as Auteur
+FROM Author A, Document_author DA, Document D, Theme T
+WHERE T.word = 'Informatique'
+AND T.word = 'Mathématiques'
+AND T.theme_id = D.theme_id
+AND D.document_id = DA.document_id
+AND DA.author_id = A.author_id;
 
 
 -- TODO Requete 16
