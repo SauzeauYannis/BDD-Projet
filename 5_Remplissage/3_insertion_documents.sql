@@ -10,7 +10,7 @@ INSERT INTO Theme (word)
 VALUES ('Informatique');
 
 INSERT INTO Theme (word)
-VALUES ('Mathématique');
+VALUES ('Mathématiques');
 
 INSERT INTO Theme (word)
 VALUES ('Chanson française');
@@ -182,6 +182,9 @@ VALUES (15, 7);
 
 INSERT INTO Document_author (document_id, author_id)
 VALUES (16, 8);
+
+INSERT INTO Document_author (document_id, author_id)
+VALUES (16, 3);
 
 INSERT INTO Document_author (document_id, author_id)
 VALUES (17, 9);
