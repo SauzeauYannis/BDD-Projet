@@ -206,15 +206,24 @@ WHERE copy_number > (SELECT AVG(SUM(copy_number))
 
 SELECT A.first_name || ' ' || A.last_name as Auteur
 FROM Author A, Document_author DA, Document D, Theme T
-WHERE T.word = 'Informatique'
-AND T.word = 'Mathématiques'
-AND T.theme_id = D.theme_id
+WHERE T.theme_id = D.theme_id
 AND D.document_id = DA.document_id
-AND DA.author_id = A.author_id;
+AND DA.author_id = A.author_id
+AND T.word = 'Informatique'
+AND T.word = 'Mathématiques';
 
 
 -- TODO Requete 16
 -- 16
+-- Editeur dont le nombre de documents empruntés est le plus grand
+
+-- Compte le nombre de copies empruntées pour les documents empruntés 
+SELECT B.DOCUMENT_ID , COUNT(*) AS borrowed_copy
+    FROM Borrow B, Copy C
+    WHERE B.COPY_ID = C.COPY_ID
+    AND B.BORROW_RETURN IS NULL
+    GROUP BY B.DOCUMENT_ID
+;
 
 
 -- TODO Requete 17
