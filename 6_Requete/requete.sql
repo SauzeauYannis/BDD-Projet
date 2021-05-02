@@ -261,6 +261,13 @@ WHERE D.document_id = DK.document_id
   AND DK.keyword_id = K.keyword_id
   AND D.title = 'SQL pour les nuls';
 
+CREATE OR REPLACE VIEW SQL_id_keywords AS
+SELECT DK.KEYWORD_ID as key
+from DOCUMENT D,
+     DOCUMENT_KEYWORD DK
+WHERE D.DOCUMENT_ID = DK.DOCUMENT_ID
+  AND D.TITLE = 'SQL pour les nuls';
+
 
 -- 17
 -- Liste des documents n'ayant aucun mot-clef en commun avec le document dont le titre est
@@ -276,6 +283,13 @@ WHERE D.document_id = DK.document_id
                  FROM SQL_nuls_keywords
                  WHERE K.word = SQL_nuls_keywords.word);
 
+SELECT DISTINCT D.title AS Titre
+FROM Document D,
+     Document_keyword DK
+WHERE D.document_id = DK.document_id
+  AND NOT EXISTS(SELECT *
+                 FROM SQL_id_keywords
+                 WHERE DK.DOCUMENT_ID = SQL_id_keywords.key);
 
 -- 18
 -- Liste des documents ayant au moins un mot-clef en commun avec le document dont le titre est
@@ -290,6 +304,12 @@ WHERE D.document_id = DK.document_id
   AND DK.keyword_id = K.keyword_id
   AND K.word IN SQL_nuls_keywords.word;
 
+SELECT DISTINCT D.title AS Titre
+FROM Document D,
+     Document_keyword DK,
+     SQL_id_keywords
+WHERE D.document_id = DK.document_id
+  AND DK.DOCUMENT_ID IN SQL_id_keywords.key;
 
 -- 19
 -- Liste des documents ayant au moins les mêmes mot-clef que le document dont le titre est
