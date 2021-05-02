@@ -308,15 +308,24 @@ WHERE D.document_id = DK.document_id
 -- Liste des documents ayant au moins les mêmes mot-clef que le document dont le titre est
 -- "SQL pour les nuls"
 
-SELECT DISTINCT D.title
-FROM Document D,
-     Keyword K,
-     Document_keyword DK
-WHERE D.document_id = DK.document_id
-  AND DK.keyword_id = K.keyword_id
-  AND EXISTS(SELECT *
-             FROM SQL_nuls_keywords
-             WHERE K.word = SQL_nuls_keywords.word);
+SELECT D.title
+FROM DOCUMENT D,
+     SQL_nuls_keywords S,
+     (
+         SELECT D.title, COUNT(D.TITLE) as nb_common_words, COUNT(S.word) as nb_sql_nul
+         FROM Document D,
+              Keyword K,
+              Document_keyword DK,
+              SQL_nuls_keywords S
+         WHERE D.document_id = DK.document_id
+           AND DK.keyword_id = K.keyword_id
+           AND K.WORD IN S.WORD
+         GROUP BY D.title) DA
+WHERE D.TITLE = DA.TITLE
+  AND nb_common_words = (SELECT count(*)
+                          FROM SQL_nuls_keywords)
+GROUP BY D.title;
+
 
 
 -- TODO
