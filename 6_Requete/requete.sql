@@ -5,7 +5,7 @@
 -- Liste par ordre alphabétique des titres de documents dont le thème comprend le mot
 -- informatique ou mathématiques.
 
-SELECT D.title AS Titre, T.word AS Thème
+SELECT D.title AS Titre, T.word AS Theme
 FROM Document D,
      Theme T
 WHERE D.theme_id = T.theme_id
@@ -17,7 +17,7 @@ ORDER BY title;
 -- Liste (titre et thème) des documents empruntés par Dupont entre le 15/11/2018 et le
 -- 15/11/2019
 
-SELECT D.title AS Titre, T.word AS Thème
+SELECT D.title AS Titre, T.word AS Theme
 FROM Borrow B,
      Borrower Bwer,
      Document D,
@@ -46,7 +46,7 @@ WHERE B.borrower_id = Bwer.borrower_id
   AND D.document_id = B.document_id
   AND D.document_id = DA.document_id
   AND DA.author_id = A.author_id
-GROUP BY A.LAST_NAME, Bwer.first_name, Bwer.last_name, D.title;
+GROUP BY A.last_name, Bwer.first_name, Bwer.last_name, D.title;
 
 
 -- TODO Requete 4
@@ -55,7 +55,7 @@ GROUP BY A.LAST_NAME, Bwer.first_name, Bwer.last_name, D.title;
 -- exécuter sur la base d'un autre collègue qui doit vous autoriser à lire certaines tables (uniquement
 -- celles qui sont utiles pour la requête).
 
-SELECT DISTINCT A.last_name AS Nom, A.first_name AS Prénom
+SELECT DISTINCT A.last_name AS Nom, A.first_name AS Prenom
 FROM Author A,
      Publisher P,
      Document D,
@@ -70,7 +70,7 @@ ORDER BY A.last_name;
 -- 5
 -- Quantité totale des exemplaires édités chez Eyrolles
 
-SELECT COUNT(*) AS Quantité
+SELECT COUNT(*) AS Quantite
 FROM Document D,
      Copy C,
      PUBLISHER P
@@ -82,7 +82,7 @@ WHERE P.name = 'Eyrolles'
 -- 6
 -- Pour chaque éditeur, nombre de documents présents à la bibliothèque.
 
-SELECT P.name AS Editeur, COUNT(C.copy_id) as Nombre_de_document
+SELECT P.name AS Editeur, COUNT(C.copy_id) as Nombre_de_documents
 FROM Publisher P,
      Document D,
      Copy C
@@ -123,7 +123,7 @@ ORDER BY P.name;
 -- 9
 -- Noms des emprunteurs habitant la même adresse que Dupont.
 
-SELECT PD.street AS Adresse, PD.postcode AS Code_postal, PD.city AS Ville, B.last_name AS Nom, B.first_name AS Prénom
+SELECT PD.street AS Adresse, PD.postcode AS Code_postal, PD.city AS Ville, B.last_name AS Nom, B.first_name AS Prenom
 FROM Borrower B,
      Personal_detail PD
 WHERE B.detail_id = PD.detail_id
@@ -135,7 +135,7 @@ WHERE B.detail_id = PD.detail_id
 -- 10
 -- Liste des éditeurs n'ayant pas édité de documents d'informatique
 
-SELECT DISTINCT P.name
+SELECT DISTINCT P.name AS Editeur
 FROM Publisher P,
      Document D
 WHERE D.publisher_id = P.detail_id
@@ -148,18 +148,18 @@ ORDER BY P.name;
 -- 11
 -- Noms des personnes n'ayant jamais emprunté de documents
 
-SELECT distinct Ber.first_name || ' ' || Ber.last_name AS Emprunteur
-FROM Borrower Ber
-WHERE Ber.borrower_id NOT IN (SELECT Ber.borrower_id
-                              FROM Borrow B,
-                                   Borrower Ber
-                              WHERE B.borrower_id = Ber.borrower_id);
+SELECT DISTINCT Bwer.first_name || ' ' || Bwer.last_name AS Emprunteur
+FROM Borrower Bwer
+WHERE Bwer.borrower_id NOT IN (SELECT Bwer.borrower_id
+                               FROM Borrow B,
+                                    Borrower Ber
+                               WHERE B.borrower_id = Bwer.borrower_id);
 
 
 -- 12
 -- Liste des documents n'ayant jamais été empruntés.
 
-SELECT distinct D.title
+SELECT DISTINCT D.title AS Titre
 FROM Document D,
      Borrow B
 WHERE D.document_id NOT IN (SELECT D.document_id
@@ -180,7 +180,7 @@ FROM Borrower Bwer,
 WHERE BC.category_name = 'Professionels'
   AND BC.borrower_category_id = Bwer.borrower_category_id
   AND Bwer.borrower_id = B.borrower_id
-  AND (CURRENT_DATE - B.borrow_date) <= 180 -- 6 * 30 jours
+  AND (CURRENT_DATE - B.borrow_date) <= 6 * 30 -- 6 * 30 jours = 6 mois
   AND B.document_id IN (SELECT D.document_id
                         FROM Document D,
                              DOCUMENT_CATEGORY DC
@@ -193,7 +193,7 @@ ORDER BY Emprunteur;
 -- Liste des documents dont le nombre d'exemplaires est supérieur au nombre moyen
 -- d'exemplaires
 
-SELECT title
+SELECT title AS Titre
 FROM Document
 WHERE copy_number > (SELECT AVG(SUM(copy_number))
                      FROM Document D
@@ -203,7 +203,7 @@ WHERE copy_number > (SELECT AVG(SUM(copy_number))
 -- Noms des auteurs ayant écrit des documents d'informatique et de mathématiques (ceux qui
 -- ont écrit les deux).
 
-SELECT DISTINCT A.first_name || ' ' || A.last_name as Auteur
+SELECT DISTINCT A.last_name AS Nom_de_l_auteur
 FROM Author A,
      Document_author DA,
      Document D,
@@ -213,7 +213,7 @@ WHERE T.theme_id = D.theme_id
   AND DA.author_id = A.author_id
   AND T.word = 'Informatique'
 INTERSECT
-SELECT DISTINCT A.first_name || ' ' || A.last_name as Auteur
+SELECT DISTINCT A.last_name AS Nom_de_l_auteur
 FROM Author A,
      Document_author DA,
      Document D,
@@ -224,73 +224,88 @@ WHERE T.theme_id = D.theme_id
   AND T.word = 'Mathématiques';
 
 
+-- Création d'une vue
+-- Compte le nombre de fois qu'un document a été emprunté
 
--- 16
--- Compte le nombre de copies empruntées pour les documents empruntés
-CREATE VIEW My_Borrow AS
-(
-SELECT D.TITLE, COUNT(B.DOCUMENT_ID) as borrowed_copy
+CREATE OR REPLACE VIEW My_Borrow AS
+SELECT D.title, COUNT(B.document_id) AS borrowed_copy
 FROM Borrow B,
      Document D
-Where B.DOCUMENT_ID = D.DOCUMENT_ID
-GROUP BY D.TITLE
-    );
+Where B.document_id = D.document_id
+GROUP BY D.title;
 
+
+-- 16
 -- Editeur dont le nombre de documents empruntés est le plus grand
-SELECT P.NAME
-from PUBLISHER P,
-     DOCUMENT D
-where D.PUBLISHER_ID = P.DETAIL_ID
-  and D.TITLE in (
-    SELECT TITLE
-    FROM My_Borrow
-    WHERE borrowed_copy = (
-        SELECT max(borrowed_copy)
-        FROM My_Borrow)
-)
-ORDER BY P.NAME;
 
--- This view will be useful for the next requests
-CREATE VIEW SQL_nuls_keywords AS
-SELECT K.WORD
-from DOCUMENT D,
-     DOCUMENT_KEYWORD DK,
-     KEYWORD K
-WHERE D.DOCUMENT_ID = DK.DOCUMENT_ID
-  AND DK.KEYWORD_ID = K.KEYWORD_ID
-  AND D.TITLE = 'SQL pour les nuls';
+SELECT P.name AS Editeur
+FROM Publisher P,
+     Document D
+WHERE D.publisher_id = P.detail_id
+  AND D.title IN (SELECT title
+                  FROM My_Borrow
+                  WHERE borrowed_copy = (SELECT MAX(borrowed_copy)
+                                         FROM My_Borrow))
+ORDER BY P.name;
 
-SELECT * FROM SQL_nuls_keywords;
-DROP VIEW SQL_NULS_KEYWORDS;
 
--- TODO Requete 17 ne marche pas (sql pour les nuls apparait)
+-- Création d'une vue
+-- Recupère les mot-clef du document dont le titre est "SQL pour les nuls"
+
+CREATE OR REPLACE VIEW SQL_nuls_keywords AS
+SELECT K.word
+FROM Document D,
+     Document_keyword DK,
+     Keyword K
+WHERE D.document_id = DK.document_id
+  AND DK.keyword_id = K.keyword_id
+  AND D.title = 'SQL pour les nuls';
+
+
 -- 17
 -- Liste des documents n'ayant aucun mot-clef en commun avec le document dont le titre est
 -- "SQL pour les nuls"
-SELECT distinct D.TITLE
-FROM DOCUMENT D, KEYWORD K, DOCUMENT_KEYWORD DK, SQL_nuls_keywords
-WHERE D.DOCUMENT_ID = DK.DOCUMENT_ID
-AND DK.KEYWORD_ID = K.KEYWORD_ID
-AND K.WORD not in SQL_nuls_keywords.WORD;
+
+SELECT DISTINCT D.title
+FROM Document D,
+     Keyword K,
+     Document_keyword DK
+WHERE D.document_id = DK.document_id
+  AND DK.keyword_id = K.keyword_id
+  AND NOT EXISTS (SELECT *
+                 FROM SQL_nuls_keywords
+                 WHERE K.word = SQL_nuls_keywords.word);
 
 
 -- 18
 -- Liste des documents ayant au moins un mot-clef en commun avec le document dont le titre est
 -- "SQL pour les nuls
-SELECT distinct D.TITLE
-FROM DOCUMENT D, KEYWORD K, DOCUMENT_KEYWORD DK, SQL_nuls_keywords
-WHERE D.DOCUMENT_ID = DK.DOCUMENT_ID
-AND DK.KEYWORD_ID = K.KEYWORD_ID
-AND K.WORD in SQL_nuls_keywords.WORD;
+
+SELECT DISTINCT D.title
+FROM Document D,
+     Keyword K,
+     Document_keyword DK,
+     SQL_nuls_keywords
+WHERE D.document_id = DK.document_id
+  AND DK.keyword_id = K.keyword_id
+  AND K.word IN SQL_nuls_keywords.word;
 
 
--- TODO Requete 19
 -- 19
 -- Liste des documents ayant au moins les mêmes mot-clef que le document dont le titre est
 -- "SQL pour les nuls"
 
+SELECT DISTINCT D.title
+FROM Document D,
+     Keyword K,
+     Document_keyword DK
+WHERE D.document_id = DK.document_id
+  AND DK.keyword_id = K.keyword_id
+  AND EXISTS (SELECT *
+                 FROM SQL_nuls_keywords
+                 WHERE K.word = SQL_nuls_keywords.word);
 
--- TODO Requete 20
+
 -- 20
 -- Liste des documents ayant exactement les mêmes mot-clef que le document dont le titre est
 -- "SQL pour les nuls
