@@ -252,16 +252,7 @@ ORDER BY P.name;
 -- Création d'une vue
 -- Recupère les mot-clef du document dont le titre est "SQL pour les nuls"
 
-CREATE OR REPLACE VIEW SQL_nuls_keywords AS
-SELECT K.word
-FROM Document D,
-     Document_keyword DK,
-     Keyword K
-WHERE D.document_id = DK.document_id
-  AND DK.keyword_id = K.keyword_id
-  AND D.title = 'SQL pour les nuls';
-
-CREATE OR REPLACE VIEW SQL_id_keywords AS
+CREATE OR REPLACE VIEW SQL_nuls_id_keywords AS
 SELECT DK.KEYWORD_ID as key
 from DOCUMENT D,
      DOCUMENT_KEYWORD DK
@@ -286,27 +277,13 @@ from SQL_nuls_keywords;
 SELECT D.title
 from DOCUMENT D
 WHERE d.DOCUMENT_ID NOT IN (
-    SELECT distinct D.DOCUMENT_ID
-    FROM Document D,
-         Keyword K,
-         Document_keyword DK
-    WHERE D.document_id = DK.document_id
-      AND DK.keyword_id = K.keyword_id
-      AND EXISTS(SELECT *
-                 FROM SQL_nuls_keywords
-                WHERE K.word = SQL_nuls_keywords.word))
-ORDER BY D.TITLE;
-
-SELECT D.title
-from DOCUMENT D
-WHERE d.DOCUMENT_ID NOT IN (
     SELECT DISTINCT D.DOCUMENT_ID
     FROM Document D,
          Document_keyword DK
     WHERE D.document_id = DK.document_id
       AND EXISTS(SELECT *
-                 FROM SQL_id_keywords
-                WHERE DK.KEYWORD_ID = SQL_id_keywords.key))
+                 FROM SQL_nuls_id_keywords
+                WHERE DK.KEYWORD_ID = SQL_nuls_id_keywords.key))
 ORDER BY D.TITLE;
 
 
@@ -314,21 +291,14 @@ ORDER BY D.TITLE;
 -- Liste des documents ayant au moins un mot-clef en commun avec le document dont le titre est
 -- "SQL pour les nuls
 
-SELECT DISTINCT D.title
-FROM Document D,
-     Keyword K,
-     Document_keyword DK,
-     SQL_nuls_keywords
-WHERE D.document_id = DK.document_id
-  AND DK.keyword_id = K.keyword_id
-  AND K.word IN SQL_nuls_keywords.word;
-
 SELECT DISTINCT D.title AS Titre
 FROM Document D,
      Document_keyword DK,
-     SQL_id_keywords
+     SQL_nuls_id_keywords
 WHERE D.document_id = DK.document_id
-  AND DK.DOCUMENT_ID IN SQL_id_keywords.key;
+  AND DK.KEYWORD_ID IN SQL_nuls_id_keywords.key
+ORDER BY D.TITLE;
+
 
 -- TODO
 -- 19
