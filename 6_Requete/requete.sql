@@ -181,9 +181,9 @@ WHERE BC.category_name = 'Professionels'
   AND BC.borrower_category_id = Bwer.borrower_category_id
   AND Bwer.borrower_id = B.borrower_id
   AND (CURRENT_DATE - B.borrow_date) <= 180 -- 6 * 30 jours
-AND B.document_id IN (SELECT D.document_id
+  AND B.document_id IN (SELECT D.document_id
                         FROM Document D,
-                            DOCUMENT_CATEGORY DC
+                             DOCUMENT_CATEGORY DC
                         WHERE D.document_category_id = DC.document_category_id
                           AND DC.category_name = 'DVD')
 ORDER BY Emprunteur;
@@ -196,47 +196,101 @@ ORDER BY Emprunteur;
 SELECT title
 FROM Document
 WHERE copy_number > (SELECT AVG(SUM(copy_number))
-                    FROM Document D
-                    GROUP BY document_id);
+                     FROM Document D
+                     GROUP BY document_id);
 
--- TODO Requete 15 (ne marche pas)
 -- 15
 -- Noms des auteurs ayant écrit des documents d'informatique et de mathématiques (ceux qui
 -- ont écrit les deux).
 
-SELECT A.first_name || ' ' || A.last_name as Auteur
-FROM Author A, Document_author DA, Document D, Theme T
+SELECT DISTINCT A.first_name || ' ' || A.last_name as Auteur
+FROM Author A,
+     Document_author DA,
+     Document D,
+     Theme T
 WHERE T.theme_id = D.theme_id
-AND D.document_id = DA.document_id
-AND DA.author_id = A.author_id
-AND T.word = 'Informatique'
-AND T.word = 'Mathématiques';
+  AND D.document_id = DA.document_id
+  AND DA.author_id = A.author_id
+  AND T.word = 'Informatique'
+INTERSECT
+SELECT DISTINCT A.first_name || ' ' || A.last_name as Auteur
+FROM Author A,
+     Document_author DA,
+     Document D,
+     Theme T
+WHERE T.theme_id = D.theme_id
+  AND D.document_id = DA.document_id
+  AND DA.author_id = A.author_id
+  AND T.word = 'Mathématiques';
 
 
--- TODO Requete 16
+
 -- 16
+-- Compte le nombre de copies empruntées pour les documents empruntés
+CREATE VIEW My_Borrow AS
+(
+SELECT D.TITLE, COUNT(B.DOCUMENT_ID) as borrowed_copy
+FROM Borrow B,
+     Document D
+Where B.DOCUMENT_ID = D.DOCUMENT_ID
+GROUP BY D.TITLE
+    );
+
 -- Editeur dont le nombre de documents empruntés est le plus grand
+SELECT P.NAME
+from PUBLISHER P,
+     DOCUMENT D
+where D.PUBLISHER_ID = P.DETAIL_ID
+  and D.TITLE in (
+    SELECT TITLE
+    FROM My_Borrow
+    WHERE borrowed_copy = (
+        SELECT max(borrowed_copy)
+        FROM My_Borrow)
+)
+ORDER BY P.NAME;
 
--- Compte le nombre de copies empruntées pour les documents empruntés 
-SELECT B.DOCUMENT_ID , COUNT(*) AS borrowed_copy
-    FROM Borrow B, Copy C
-    WHERE B.COPY_ID = C.COPY_ID
-    AND B.BORROW_RETURN IS NULL
-    GROUP BY B.DOCUMENT_ID
-;
+-- This view will be useful for the next requests
+CREATE VIEW SQL_nuls_keywords AS
+SELECT K.WORD
+from DOCUMENT D,
+     DOCUMENT_KEYWORD DK,
+     KEYWORD K
+WHERE D.DOCUMENT_ID = DK.DOCUMENT_ID
+  AND DK.KEYWORD_ID = K.KEYWORD_ID
+  AND D.TITLE = 'SQL pour les nuls';
 
+SELECT * FROM SQL_nuls_keywords;
+DROP VIEW SQL_NULS_KEYWORDS;
 
--- TODO Requete 17
+-- TODO Requete 17 ne marche pas (sql pour les nuls apparait)
 -- 17
+-- Liste des documents n'ayant aucun mot-clef en commun avec le document dont le titre est
+-- "SQL pour les nuls"
+SELECT distinct D.TITLE
+FROM DOCUMENT D, KEYWORD K, DOCUMENT_KEYWORD DK, SQL_nuls_keywords
+WHERE D.DOCUMENT_ID = DK.DOCUMENT_ID
+AND DK.KEYWORD_ID = K.KEYWORD_ID
+AND K.WORD not in SQL_nuls_keywords.WORD;
 
 
--- TODO Requete 18
 -- 18
+-- Liste des documents ayant au moins un mot-clef en commun avec le document dont le titre est
+-- "SQL pour les nuls
+SELECT distinct D.TITLE
+FROM DOCUMENT D, KEYWORD K, DOCUMENT_KEYWORD DK, SQL_nuls_keywords
+WHERE D.DOCUMENT_ID = DK.DOCUMENT_ID
+AND DK.KEYWORD_ID = K.KEYWORD_ID
+AND K.WORD in SQL_nuls_keywords.WORD;
 
 
 -- TODO Requete 19
 -- 19
+-- Liste des documents ayant au moins les mêmes mot-clef que le document dont le titre est
+-- "SQL pour les nuls"
 
 
 -- TODO Requete 20
 -- 20
+-- Liste des documents ayant exactement les mêmes mot-clef que le document dont le titre est
+-- "SQL pour les nuls
