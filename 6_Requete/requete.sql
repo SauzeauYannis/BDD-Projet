@@ -266,13 +266,13 @@ WHERE D.document_id = DK.document_id
 -- Liste des documents n'ayant aucun mot-clef en commun avec le document dont le titre est
 -- "SQL pour les nuls"
 
-SELECT DISTINCT D.title
+SELECT DISTINCT D.title AS Titre
 FROM Document D,
      Keyword K,
      Document_keyword DK
 WHERE D.document_id = DK.document_id
   AND DK.keyword_id = K.keyword_id
-  AND NOT EXISTS (SELECT *
+  AND NOT EXISTS(SELECT *
                  FROM SQL_nuls_keywords
                  WHERE K.word = SQL_nuls_keywords.word);
 
@@ -281,7 +281,7 @@ WHERE D.document_id = DK.document_id
 -- Liste des documents ayant au moins un mot-clef en commun avec le document dont le titre est
 -- "SQL pour les nuls
 
-SELECT DISTINCT D.title
+SELECT DISTINCT D.title AS Titre
 FROM Document D,
      Keyword K,
      Document_keyword DK,
@@ -295,18 +295,33 @@ WHERE D.document_id = DK.document_id
 -- Liste des documents ayant au moins les mêmes mot-clef que le document dont le titre est
 -- "SQL pour les nuls"
 
-SELECT DISTINCT D.title
+SELECT DISTINCT D.title AS Titre
 FROM Document D,
      Keyword K,
      Document_keyword DK
 WHERE D.document_id = DK.document_id
   AND DK.keyword_id = K.keyword_id
-  AND EXISTS (SELECT *
-                 FROM SQL_nuls_keywords
-                 WHERE K.word = SQL_nuls_keywords.word)
-ORDER BY D.TITLE;
+  AND EXISTS(SELECT *
+             FROM SQL_nuls_keywords
+             WHERE K.word = SQL_nuls_keywords.word);
 
 
 -- 20
 -- Liste des documents ayant exactement les mêmes mot-clef que le document dont le titre est
 -- "SQL pour les nuls
+
+SELECT DISTINCT D.title AS Titre
+FROM Document D,
+     Keyword K,
+     Document_keyword DK
+WHERE D.document_id = DK.document_id
+  AND DK.keyword_id = K.keyword_id
+  AND EXISTS(SELECT *
+             FROM SQL_nuls_keywords
+             WHERE K.word = SQL_nuls_keywords.word)
+  AND D.document_id IN (SELECT document_id
+                       FROM (SELECT document_id, COUNT(*) AS keywoards_number
+                             FROM Document_keyword
+                             GROUP BY document_id)
+                       WHERE keywoards_number = (SELECT COUNT(*)
+                                                 FROM SQL_nuls_keywords));
