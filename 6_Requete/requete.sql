@@ -261,27 +261,39 @@ WHERE D.document_id = DK.document_id
   AND DK.keyword_id = K.keyword_id
   AND D.title = 'SQL pour les nuls';
 
+-- to see the document ans their keywords
+Select D.TITLE, K.WORD
+FROM DOCUMENT D,
+     KEYWORD K,
+     DOCUMENT_KEYWORD DK
+WHERE D.DOCUMENT_ID = DK.DOCUMENT_ID
+  AND DK.KEYWORD_ID = K.KEYWORD_ID;
+
+SELECT *
+from SQL_nuls_keywords;
 
 -- 17
 -- Liste des documents n'ayant aucun mot-clef en commun avec le document dont le titre est
 -- "SQL pour les nuls"
 
-SELECT DISTINCT D.title AS Titre
-FROM Document D,
-     Keyword K,
-     Document_keyword DK
-WHERE D.document_id = DK.document_id
-  AND DK.keyword_id = K.keyword_id
-  AND NOT EXISTS(SELECT *
+SELECT D.title
+from DOCUMENT D
+WHERE d.DOCUMENT_ID NOT IN (
+    SELECT distinct D.DOCUMENT_ID
+    FROM Document D,
+         Keyword K,
+         Document_keyword DK
+    WHERE D.document_id = DK.document_id
+      AND DK.keyword_id = K.keyword_id
+      AND EXISTS(SELECT *
                  FROM SQL_nuls_keywords
-                 WHERE K.word = SQL_nuls_keywords.word);
-
+                 WHERE K.word = SQL_nuls_keywords.word));
 
 -- 18
 -- Liste des documents ayant au moins un mot-clef en commun avec le document dont le titre est
 -- "SQL pour les nuls
 
-SELECT DISTINCT D.title AS Titre
+SELECT DISTINCT D.title
 FROM Document D,
      Keyword K,
      Document_keyword DK,
@@ -291,11 +303,12 @@ WHERE D.document_id = DK.document_id
   AND K.word IN SQL_nuls_keywords.word;
 
 
+-- TODO
 -- 19
 -- Liste des documents ayant au moins les mêmes mot-clef que le document dont le titre est
 -- "SQL pour les nuls"
 
-SELECT DISTINCT D.title AS Titre
+SELECT DISTINCT D.title
 FROM Document D,
      Keyword K,
      Document_keyword DK
@@ -306,22 +319,7 @@ WHERE D.document_id = DK.document_id
              WHERE K.word = SQL_nuls_keywords.word);
 
 
+-- TODO
 -- 20
 -- Liste des documents ayant exactement les mêmes mot-clef que le document dont le titre est
 -- "SQL pour les nuls
-
-SELECT DISTINCT D.title AS Titre
-FROM Document D,
-     Keyword K,
-     Document_keyword DK
-WHERE D.document_id = DK.document_id
-  AND DK.keyword_id = K.keyword_id
-  AND EXISTS(SELECT *
-             FROM SQL_nuls_keywords
-             WHERE K.word = SQL_nuls_keywords.word)
-  AND D.document_id IN (SELECT document_id
-                       FROM (SELECT document_id, COUNT(*) AS keywoards_number
-                             FROM Document_keyword
-                             GROUP BY document_id)
-                       WHERE keywoards_number = (SELECT COUNT(*)
-                                                 FROM SQL_nuls_keywords));
