@@ -70,13 +70,13 @@ INSERT INTO Document (title, document_category_id, publisher_id, theme_id)
 VALUES ('Harry Potter', 1, 1, 1);
 
 INSERT INTO Document (title, document_category_id, publisher_id, theme_id)
-VALUES ('Johnny Happy day', 2, 1, 1);
+VALUES ('Apprendre le SQL', 2, 5, 2);
 
 INSERT INTO Document (title, document_category_id, publisher_id, theme_id)
-VALUES ('Blanche fesses et les sept mains', 3, 1, 1);
+VALUES ('SQL la revanche', 3, 7, 2);
 
 INSERT INTO Document (title, document_category_id, publisher_id, theme_id)
-VALUES ('stepsis is stuck', 4, 1, 1);
+VALUES ('SQL tuto triggers', 4, 5, 2);
 
 INSERT INTO Document (title, document_category_id, publisher_id, theme_id)
 VALUES ('SQL pour les nuls', 1, 5, 2);
@@ -134,6 +134,15 @@ VALUES ('Créer une classe en Java', 4, 8, 6);
 
 INSERT INTO Document_author (document_id, author_id)
 VALUES (1, 1);
+
+INSERT INTO Document_author (document_id, author_id)
+VALUES (2, 2);
+
+INSERT INTO Document_author (document_id, author_id)
+VALUES (3, 2);
+
+INSERT INTO Document_author (document_id, author_id)
+VALUES (4, 2);
 
 INSERT INTO Document_author (document_id, author_id)
 VALUES (5, 2);
@@ -212,6 +221,27 @@ VALUES (1, 1);
 
 INSERT INTO Document_keyword (document_id, keyword_id)
 VALUES (1, 2);
+
+INSERT INTO Document_keyword (document_id, keyword_id)
+VALUES (2, 6);
+
+INSERT INTO Document_keyword (document_id, keyword_id)
+VALUES (2, 9);
+
+INSERT INTO Document_keyword (document_id, keyword_id)
+VALUES (3, 6);
+
+INSERT INTO Document_keyword (document_id, keyword_id)
+VALUES (3, 9);
+
+INSERT INTO Document_keyword (document_id, keyword_id)
+VALUES (3, 8);
+
+INSERT INTO Document_keyword (document_id, keyword_id)
+VALUES (4, 9);
+
+INSERT INTO Document_keyword (document_id, keyword_id)
+VALUES (4, 8);
 
 INSERT INTO Document_keyword (document_id, keyword_id)
 VALUES (5, 6);
@@ -386,6 +416,27 @@ VALUES (3, 1, 100);
 
 INSERT INTO Copy (copy_id, document_id, shelf_number)
 VALUES (4, 1, 100);
+
+INSERT INTO Copy (copy_id, document_id, shelf_number)
+VALUES (1, 2, 100);
+
+INSERT INTO Copy (copy_id, document_id, shelf_number)
+VALUES (2, 2, 100);
+
+INSERT INTO Copy (copy_id, document_id, shelf_number)
+VALUES (1, 3, 100);
+
+INSERT INTO Copy (copy_id, document_id, shelf_number)
+VALUES (2, 3, 100);
+
+INSERT INTO Copy (copy_id, document_id, shelf_number)
+VALUES (1, 4, 100);
+
+INSERT INTO Copy (copy_id, document_id, shelf_number)
+VALUES (2, 4, 100);
+
+INSERT INTO Copy (copy_id, document_id, shelf_number)
+VALUES (3, 4, 100);
 
 INSERT INTO Copy (copy_id, document_id, shelf_number)
 VALUES (1, 5, 200);

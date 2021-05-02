@@ -303,7 +303,8 @@ WHERE D.document_id = DK.document_id
   AND DK.keyword_id = K.keyword_id
   AND EXISTS (SELECT *
                  FROM SQL_nuls_keywords
-                 WHERE K.word = SQL_nuls_keywords.word);
+                 WHERE K.word = SQL_nuls_keywords.word)
+ORDER BY D.TITLE;
 
 
 -- 20
