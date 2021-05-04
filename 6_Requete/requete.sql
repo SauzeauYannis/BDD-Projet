@@ -250,7 +250,7 @@ ORDER BY P.name;
 
 
 -- Création d'une vue
--- Recupère les mot-clef du document dont le titre est "SQL pour les nuls"
+-- Recupère les identifiants des mot-clés appartenant au document dont le titre est "SQL pour les nuls"
 
 CREATE OR REPLACE VIEW SQL_nuls_id_keywords AS
 SELECT DK.KEYWORD_ID as key
@@ -259,8 +259,9 @@ from DOCUMENT D,
 WHERE D.DOCUMENT_ID = DK.DOCUMENT_ID
   AND D.TITLE = 'SQL pour les nuls';
 
--- to see the document ans their keywords
-Select D.TITLE, K.WORD
+-- Voir les mot-clés (et leur identifiant) de chaque document
+
+SELECT D.TITLE, K.WORD AS KEYWORD, K.KEYWORD_ID
 FROM DOCUMENT D,
      KEYWORD K,
      DOCUMENT_KEYWORD DK
@@ -300,32 +301,50 @@ WHERE D.document_id = DK.document_id
 ORDER BY D.TITLE;
 
 
--- TODO
 -- 19
 -- Liste des documents ayant au moins les mêmes mot-clef que le document dont le titre est
 -- "SQL pour les nuls"
 
 SELECT D.title
 FROM DOCUMENT D,
-     SQL_nuls_keywords S,
      (
-         SELECT D.title, COUNT(D.TITLE) as nb_common_words, COUNT(S.word) as nb_sql_nul
+         SELECT D.DOCUMENT_ID, COUNT(S.KEY) as nb_common_words
          FROM Document D,
-              Keyword K,
               Document_keyword DK,
-              SQL_nuls_keywords S
+              SQL_nuls_id_keywords S
          WHERE D.document_id = DK.document_id
-           AND DK.keyword_id = K.keyword_id
-           AND K.WORD IN S.WORD
-         GROUP BY D.title) DA
-WHERE D.TITLE = DA.TITLE
+           AND DK.KEYWORD_ID IN S.KEY
+         GROUP BY D.DOCUMENT_ID) DA
+WHERE D.DOCUMENT_ID = DA.DOCUMENT_ID
   AND nb_common_words = (SELECT count(*)
-                          FROM SQL_nuls_keywords)
+                            FROM SQL_nuls_keywords)
 GROUP BY D.title;
 
 
-
--- TODO
 -- 20
 -- Liste des documents ayant exactement les mêmes mot-clef que le document dont le titre est
--- "SQL pour les nuls
+-- "SQL pour les nuls"
+
+SELECT D.title
+FROM DOCUMENT D,
+     (
+         SELECT D.DOCUMENT_ID, COUNT(S.KEY) as nb_common_words
+         FROM Document D,
+              Document_keyword DK,
+              SQL_nuls_id_keywords S
+         WHERE D.document_id = DK.document_id
+           AND DK.KEYWORD_ID IN S.KEY
+         GROUP BY D.DOCUMENT_ID
+     ) DA,
+     (
+        SELECT DOCUMENT_ID, COUNT(KEYWORD_ID) AS nb_words
+         FROM DOCUMENT_KEYWORD
+         GROUP BY DOCUMENT_ID
+     ) DB
+WHERE D.DOCUMENT_ID = DA.DOCUMENT_ID
+  AND DA.DOCUMENT_ID = DB.DOCUMENT_ID
+  AND nb_common_words = (SELECT count(*)
+                            FROM SQL_nuls_keywords)
+  AND nb_words = (SELECT count(*)
+                    FROM SQL_nuls_keywords)
+GROUP BY D.title;
