@@ -310,9 +310,8 @@ WHERE D.document_id = DK.document_id
 
 SELECT D.title
 FROM DOCUMENT D,
-     SQL_nuls_keywords S,
      (
-         SELECT D.title, COUNT(D.TITLE) as nb_common_words, COUNT(S.word) as nb_sql_nul
+         SELECT D.title, COUNT(D.TITLE) as nb_common_words
          FROM Document D,
               Keyword K,
               Document_keyword DK,
@@ -323,7 +322,7 @@ FROM DOCUMENT D,
          GROUP BY D.title) DA
 WHERE D.TITLE = DA.TITLE
   AND nb_common_words = (SELECT count(*)
-                          FROM SQL_nuls_keywords)
+                         FROM SQL_nuls_keywords)
 GROUP BY D.title;
 
 
@@ -332,3 +331,21 @@ GROUP BY D.title;
 -- 20
 -- Liste des documents ayant exactement les mêmes mot-clef que le document dont le titre est
 -- "SQL pour les nuls
+
+SELECT D.TITLE, K.WORD
+from (
+         SELECT DK.document_id, count(DK.DOCUMENT_ID) as nb
+         FROM DOCUMENT_KEYWORD DK
+         GROUP BY DK.DOCUMENT_ID) DKA,
+     (
+         SELECT count(*) as nb_nul
+         FROM SQL_nuls_keywords) S,
+     DOCUMENT_KEYWORD DK,
+     KEYWORD K,
+     DOCUMENT D,
+     SQL_NULS_KEYWORDS S
+WHERE nb_nul = nb
+  AND DKA.DOCUMENT_ID = DK.DOCUMENT_ID
+  AND DK.KEYWORD_ID = K.KEYWORD_ID
+  AND D.DOCUMENT_ID = DK.DOCUMENT_ID
+  AND K.WORD IN S.WORD
