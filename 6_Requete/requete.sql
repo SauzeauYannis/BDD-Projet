@@ -5,6 +5,9 @@
 -- Liste par ordre alphabétique des titres de documents dont le thème comprend le mot
 -- informatique ou mathématiques.
 
+-- INDEX B-tree sur l'attribut word de la table Theme
+CREATE INDEX idx_theme_word ON THEME(WORD);
+
 SELECT D.title AS Titre, T.word AS Theme
 FROM Document D,
      Theme T
@@ -29,6 +32,28 @@ WHERE B.borrower_id = Bwer.borrower_id
   AND TO_DATE('15/11/2018', 'DD/MM/YYYY') <= B.borrow_date
   AND B.borrow_date <= TO_DATE('15/11/2019', 'DD/MM/YYYY');
 
+
+-- INDEX B-tree sur l'attribut last_name de la table Borrower
+CREATE INDEX idx_borrower_ln ON BORROWER(LAST_NAME);
+
+-- Même requête mais optimisée
+SELECT D.title AS Titre, T.word AS Theme
+FROM Document D,
+     Theme T,
+     (
+         SELECT B.DOCUMENT_ID
+         FROM Borrow B,
+              (
+                  SELECT BORROWER_ID
+                  FROM BORROWER
+                  WHERE last_name = 'Dupont'
+              ) Bwer
+         WHERE B.borrower_id = Bwer.borrower_id
+            AND TO_DATE('15/11/2018', 'DD/MM/YYYY') <= B.borrow_date
+            AND B.borrow_date <= TO_DATE('15/11/2019', 'DD/MM/YYYY')
+     ) B
+WHERE B.document_id = D.document_id
+  AND D.theme_id = T.theme_id;
 
 -- 3
 -- Pour chaque emprunteur, donner la liste des titres des documents qu'il a empruntés avec le
@@ -55,6 +80,9 @@ GROUP BY A.last_name, Bwer.first_name, Bwer.last_name, D.title;
 -- exécuter sur la base d'un autre collègue qui doit vous autoriser à lire certaines tables (uniquement
 -- celles qui sont utiles pour la requête).
 
+-- INDEX B-tree sur l'attribut last_name de la table Borrower
+CREATE INDEX idx_publisher_name ON PUBLISHER(NAME);
+
 SELECT DISTINCT A.last_name AS Nom, A.first_name AS Prenom
 FROM Author A,
      Publisher P,
@@ -69,6 +97,8 @@ ORDER BY A.last_name;
 
 -- 5
 -- Quantité totale des exemplaires édités chez Eyrolles
+
+DROP INDEX idx_publisher_name;
 
 SELECT COUNT(*) AS Quantite
 FROM Document D,
@@ -348,3 +378,9 @@ WHERE D.DOCUMENT_ID = DA.DOCUMENT_ID
   AND nb_words = (SELECT count(*)
                     FROM SQL_nuls_keywords)
 GROUP BY D.title;
+
+
+-- Pour supprimer les index créés
+DROP INDEX idx_theme_word;
+
+DROP INDEX idx_publisher_name;
