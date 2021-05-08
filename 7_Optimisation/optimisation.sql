@@ -146,6 +146,7 @@ WHERE BC.category_name = 'Professionels'
 ORDER BY Emprunteur;
 
 -- 14)
+<<<<<<< HEAD
 -- Pas encore fait
 
 -- 15)
@@ -165,6 +166,27 @@ ORDER BY Emprunteur;
 
 -- 20)
 -- Pas encore fait
+=======
+-- Pas d'optimisation
+
+-- 15)
+-- Pas d'optimisation
+
+-- 16)
+-- Pas d'optimisation
+
+-- 17)
+-- Pas d'optimisation
+
+-- 18)
+-- Pas d'optimisation
+
+-- 19)
+-- Pas d'optimisation
+
+-- 20)
+-- Pas d'optimisation
+>>>>>>> b29bc9b0c6c0d153b20b9f3813ed839d5585a559
 
 
 -- Suppresion des index
