@@ -4,9 +4,6 @@
 -- Liste par ordre alphabétique des titres de documents dont le thème comprend le mot
 -- informatique ou mathématiques.
 
--- INDEX B-tree sur l'attribut word de la table Theme
-CREATE INDEX idx_theme_word ON THEME(WORD);
-
 SELECT D.title AS Titre, T.word AS Theme
 FROM Document D,
      Theme T
@@ -32,28 +29,6 @@ WHERE B.borrower_id = Bwer.borrower_id
   AND B.borrow_date <= TO_DATE('15/11/2019', 'DD/MM/YYYY');
 
 
--- INDEX B-tree sur l'attribut last_name de la table Borrower
-CREATE INDEX idx_borrower_ln ON BORROWER(LAST_NAME);
-
--- Même requête mais optimisée
-SELECT D.title AS Titre, T.word AS Theme
-FROM Document D,
-     Theme T,
-     (
-         SELECT B.DOCUMENT_ID
-         FROM Borrow B,
-              (
-                  SELECT BORROWER_ID
-                  FROM BORROWER
-                  WHERE last_name = 'Dupont'
-              ) Bwer
-         WHERE B.borrower_id = Bwer.borrower_id
-            AND TO_DATE('15/11/2018', 'DD/MM/YYYY') <= B.borrow_date
-            AND B.borrow_date <= TO_DATE('15/11/2019', 'DD/MM/YYYY')
-     ) B
-WHERE B.document_id = D.document_id
-  AND D.theme_id = T.theme_id;
-
 -- 3
 -- Pour chaque emprunteur, donner la liste des titres des documents qu'il a empruntés avec le
 -- nom des auteurs pour chaque document.
@@ -73,14 +48,10 @@ WHERE B.borrower_id = Bwer.borrower_id
 GROUP BY A.last_name, Bwer.first_name, Bwer.last_name, D.title;
 
 
--- TODO Requete 4
 -- 4
 -- Noms des auteurs ayant écrit un livre édité chez Dunod. Attention : cette requête est à
 -- exécuter sur la base d'un autre collègue qui doit vous autoriser à lire certaines tables (uniquement
 -- celles qui sont utiles pour la requête).
-
--- INDEX B-tree sur l'attribut last_name de la table Borrower
-CREATE INDEX idx_publisher_name ON PUBLISHER(NAME);
 
 SELECT DISTINCT A.last_name AS Nom, A.first_name AS Prenom
 FROM Author A,
@@ -96,8 +67,6 @@ ORDER BY A.last_name;
 
 -- 5
 -- Quantité totale des exemplaires édités chez Eyrolles
-
-DROP INDEX idx_publisher_name;
 
 SELECT COUNT(*) AS Quantite
 FROM Document D,
@@ -180,8 +149,7 @@ ORDER BY P.name;
 SELECT DISTINCT Bwer.first_name || ' ' || Bwer.last_name AS Emprunteur
 FROM Borrower Bwer
 WHERE Bwer.borrower_id NOT IN (SELECT Bwer.borrower_id
-                               FROM Borrow B,
-                                    Borrower Ber
+                               FROM Borrow B
                                WHERE B.borrower_id = Bwer.borrower_id);
 
 
@@ -225,7 +193,7 @@ ORDER BY Emprunteur;
 SELECT title AS Titre
 FROM Document
 WHERE copy_number > (SELECT AVG(SUM(copy_number))
-                     FROM Document D
+                     FROM Document
                      GROUP BY document_id);
 
 -- 15
@@ -282,36 +250,26 @@ ORDER BY P.name;
 -- Recupère les identifiants des mot-clés appartenant au document dont le titre est "SQL pour les nuls"
 
 CREATE OR REPLACE VIEW SQL_nuls_id_keywords AS
-SELECT DK.keyword_id as key
-from Document D,
+SELECT DK.keyword_id AS key
+FROM Document D,
      Document_keyword DK
 WHERE D.document_id = DK.document_id
   AND D.title = 'SQL pour les nuls';
-
--- Voir les mot-clés (et leur identifiant) de chaque document
-
-SELECT D.title, K.word AS Keyword, K.keyword_id
-FROM Document D,
-     Keyword K,
-     Document_keyword DK
-WHERE D.document_id = DK.document_id
-  AND DK.keyword_id = K.keyword_id;
 
 
 -- 17
 -- Liste des documents n'ayant aucun mot-clef en commun avec le document dont le titre est
 -- "SQL pour les nuls"
 
-SELECT D.title
-from Document D
-WHERE d.document_id NOT IN (
-    SELECT DISTINCT D.document_id
-    FROM Document D,
-         Document_keyword DK
-    WHERE D.document_id = DK.document_id
-      AND EXISTS(SELECT *
-                 FROM SQL_nuls_id_keywords
-                 WHERE DK.keyword_id = SQL_nuls_id_keywords.key))
+SELECT D.title AS Titre
+FROM Document D
+WHERE d.document_id NOT IN (SELECT DISTINCT D.document_id
+                            FROM Document D,
+                                 Document_keyword DK
+                            WHERE D.document_id = DK.document_id
+                              AND EXISTS(SELECT *
+                                         FROM SQL_nuls_id_keywords
+                                         WHERE DK.keyword_id = SQL_nuls_id_keywords.key))
 ORDER BY D.title;
 
 
@@ -332,16 +290,15 @@ ORDER BY D.title;
 -- Liste des documents ayant au moins les mêmes mot-clef que le document dont le titre est
 -- "SQL pour les nuls"
 
-SELECT D.title
+SELECT D.title AS Titre
 FROM DOCUMENT D,
-     (
-         SELECT D.document_id, COUNT(S.key) AS nb_common_words
-         FROM Document D,
-              Document_keyword DK,
-              SQL_nuls_id_keywords S
-         WHERE D.document_id = DK.document_id
-           AND DK.keyword_id IN S.key
-         GROUP BY D.document_id) DA
+     (SELECT D.document_id, COUNT(S.key) AS nb_common_words
+      FROM Document D,
+           Document_keyword DK,
+           SQL_nuls_id_keywords S
+      WHERE D.document_id = DK.document_id
+        AND DK.keyword_id IN S.key
+      GROUP BY D.document_id) DA
 WHERE D.document_id = DA.document_id
   AND nb_common_words = (SELECT COUNT(*)
                          FROM SQL_nuls_keywords)
@@ -352,34 +309,25 @@ GROUP BY D.title;
 -- Liste des documents ayant exactement les mêmes mot-clef que le document dont le titre est
 -- "SQL pour les nuls"
 
-SELECT D.title
-FROM DOCUMENT D,
-     (
-         SELECT D.document_id, COUNT(S.key) AS nb_common_words
-         FROM Document D,
-              Document_keyword DK,
-              SQL_nuls_id_keywords S
-         WHERE D.document_id = DK.document_id
-           AND DK.keyword_id IN S.key
-         GROUP BY D.document_id
+SELECT D.title AS Titre
+FROM Document D,
+     (SELECT D.document_id, COUNT(S.key) AS nb_common_words
+      FROM Document D,
+           Document_keyword DK,
+           SQL_nuls_id_keywords S
+      WHERE D.document_id = DK.document_id
+        AND DK.keyword_id IN S.key
+      GROUP BY D.document_id
      ) DA,
-     (
-         SELECT document_id, COUNT(keyword_id) AS nb_words
-         FROM DOCUMENT_KEYWORD
-         GROUP BY document_id
+     (SELECT document_id, COUNT(keyword_id) AS nb_words
+      FROM Document_keyword
+      GROUP BY document_id
      ) DB,
-     (
-         SELECT count(*) as nb_words_sql_nuls
-         FROM SQL_nuls_id_keywords
+     (SELECT COUNT(*) AS nb_words_sql_nuls
+      FROM SQL_nuls_id_keywords
      ) DC
 WHERE D.document_id = DA.document_id
   AND DA.document_id = DB.document_id
   AND nb_common_words = DC.nb_words_sql_nuls
   AND nb_words = DC.nb_words_sql_nuls
 GROUP BY D.title;
-
-
--- Pour supprimer les index créés
-DROP INDEX idx_theme_word;
-
-DROP INDEX idx_publisher_name;
