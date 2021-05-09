@@ -196,6 +196,7 @@ WHERE copy_number > (SELECT AVG(SUM(copy_number))
                      FROM Document
                      GROUP BY document_id);
 
+
 -- 15
 -- Noms des auteurs ayant écrit des documents d'informatique et de mathématiques (ceux qui
 -- ont écrit les deux).
@@ -301,7 +302,7 @@ FROM DOCUMENT D,
       GROUP BY D.document_id) DA
 WHERE D.document_id = DA.document_id
   AND nb_common_words = (SELECT COUNT(*)
-                         FROM SQL_nuls_keywords)
+                         FROM SQL_nuls_id_keywords)
 GROUP BY D.title;
 
 

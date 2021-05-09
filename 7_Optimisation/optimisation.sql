@@ -17,6 +17,9 @@ CREATE INDEX index_borrower_category_category_name ON Borrower_category (categor
 -- INDEX B-tree sur l'attribut category_name de la table Document_category
 CREATE INDEX index_document_category_category_name ON Document_category (category_name);
 
+-- INDEX B-tree sur l'attribut title de la table Document
+CREATE INDEX index_document_title ON Document (title);
+
 
 -- Requêtes optimisés
 
@@ -146,25 +149,99 @@ WHERE BC.category_name = 'Professionels'
 ORDER BY Emprunteur;
 
 -- 14)
--- Pas encore fait
+-- Pas d'optimisation
 
 -- 15)
--- Pas encore fait
+SELECT DISTINCT /*+ INDEX(T.word index_theme_word) */ A.last_name AS Nom_de_l_auteur
+FROM Author A,
+     Document_author DA,
+     Document D,
+     Theme T
+WHERE T.theme_id = D.theme_id
+  AND D.document_id = DA.document_id
+  AND DA.author_id = A.author_id
+  AND T.word = 'Informatique'
+INTERSECT
+SELECT DISTINCT A.last_name AS Nom_de_l_auteur
+FROM Author A,
+     Document_author DA,
+     Document D,
+     Theme T
+WHERE T.theme_id = D.theme_id
+  AND D.document_id = DA.document_id
+  AND DA.author_id = A.author_id
+  AND T.word = 'Mathématiques';
 
 -- 16)
--- Pas encore fait
+-- Pas d'optimisation
+
+-- Optimisation de la vue SQL_nuls_id_keywords pour les reqûetes 17, 18, 19 et 20
+CREATE OR REPLACE VIEW SQL_nuls_id_keywords_opti AS
+SELECT /*+ INDEX(D.title index_theme_word) */ DK.keyword_id AS key
+FROM Document D,
+     Document_keyword DK
+WHERE D.document_id = DK.document_id
+  AND D.title = 'SQL pour les nuls';
 
 -- 17)
--- Pas encore fait
+SELECT D.title AS Titre
+FROM Document D
+WHERE d.document_id NOT IN (SELECT DISTINCT D.document_id
+                            FROM Document D,
+                                 Document_keyword DK
+                            WHERE D.document_id = DK.document_id
+                              AND EXISTS(SELECT *
+                                         FROM SQL_nuls_id_keywords_opti
+                                         WHERE DK.keyword_id = SQL_nuls_id_keywords_opti.key))
+ORDER BY D.title;
 
 -- 18)
--- Pas encore fait
+SELECT DISTINCT D.title AS Titre
+FROM Document D,
+     Document_keyword DK,
+     SQL_nuls_id_keywords_opti
+WHERE D.document_id = DK.document_id
+  AND DK.keyword_id IN SQL_nuls_id_keywords_opti.key
+ORDER BY D.title;
 
 -- 19)
--- Pas encore fait
+SELECT D.title AS Titre
+FROM DOCUMENT D,
+     (SELECT D.document_id, COUNT(S.key) AS nb_common_words
+      FROM Document D,
+           Document_keyword DK,
+           SQL_nuls_id_keywords_opti S
+      WHERE D.document_id = DK.document_id
+        AND DK.keyword_id IN S.key
+      GROUP BY D.document_id) DA
+WHERE D.document_id = DA.document_id
+  AND nb_common_words = (SELECT COUNT(*)
+                         FROM SQL_nuls_id_keywords_opti)
+GROUP BY D.title;
 
 -- 20)
--- Pas encore fait
+SELECT D.title AS Titre
+FROM Document D,
+     (SELECT D.document_id, COUNT(S.key) AS nb_common_words
+      FROM Document D,
+           Document_keyword DK,
+           SQL_nuls_id_keywords_opti S
+      WHERE D.document_id = DK.document_id
+        AND DK.keyword_id IN S.key
+      GROUP BY D.document_id
+     ) DA,
+     (SELECT document_id, COUNT(keyword_id) AS nb_words
+      FROM Document_keyword
+      GROUP BY document_id
+     ) DB,
+     (SELECT COUNT(*) AS nb_words_sql_nuls
+      FROM SQL_nuls_id_keywords_opti
+     ) DC
+WHERE D.document_id = DA.document_id
+  AND DA.document_id = DB.document_id
+  AND nb_common_words = DC.nb_words_sql_nuls
+  AND nb_words = DC.nb_words_sql_nuls
+GROUP BY D.title;
 
 
 -- Suppresion des index
@@ -172,3 +249,6 @@ ORDER BY Emprunteur;
 DROP INDEX index_theme_word;
 DROP INDEX index_borrower_last_name;
 DROP INDEX index_publisher_name;
+DROP INDEX index_borrower_category_category_name;
+DROP INDEX index_document_category_category_name;
+DROP INDEX index_document_title;
