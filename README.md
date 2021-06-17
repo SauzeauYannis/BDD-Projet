@@ -50,7 +50,7 @@ Les scripts SQL sont répartis dans plusieurs dossier numérotés selon leur ord
 
 ### Résultat
 
-Nous avons obtenu la note de ?/20. (Résultat en juin)
+Nous avons obtenu la note de 16,75/20.
 
 <a name="en"/>
 
@@ -88,4 +88,4 @@ This project was developed in a group of three using the virtual machine [Oracle
 
 ### Result
 
-We obtained a score of ?/20. (Result in June)
+We obtained a score of 16.75/20.
